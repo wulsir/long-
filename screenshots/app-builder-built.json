@@ -1,0 +1,38 @@
+{
+  "url": "http://127.0.0.1:8081/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "physics",
+      "hasCanvas": false,
+      "bodyTextLen": 164,
+      "bodyTextHash": "f2dddb825d6b3f7d149be42462bfaffcab58d41798ae3e7d8c8dda01f02310fa",
+      "bodyTextPrefix": "@physics physics 攝影師 · 獨立設計師 用光影記錄日常，把想法做成可以分享的東西。 台北 Taipei 開放品",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "physics",
+      "hasCanvas": false,
+      "bodyTextLen": 164,
+      "bodyTextHash": "f2dddb825d6b3f7d149be42462bfaffcab58d41798ae3e7d8c8dda01f02310fa",
+      "bodyTextPrefix": "@physics physics 攝影師 · 獨立設計師 用光影記錄日常，把想法做成可以分享的東西。 台北 Taipei 開放品",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-built.json",
+  "divergesFromBaseline": false,
+  "baselineReasons": []
+}

@@ -1,0 +1,168 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Noto Sans TC", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Noto Serif TC", "Times New Roman", serif;
+
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+  --color-muted: var(--ink-muted);
+  --color-subtle: var(--ink-subtle);
+  --color-card: var(--paper-card);
+  --color-card-hover: var(--paper-card-hover);
+  --color-icon: var(--paper-icon);
+  --color-border: var(--line);
+  --color-accent: var(--sage);
+  --color-ring: var(--focus);
+
+  --shadow-card: var(--elev);
+  --shadow-card-hover: var(--elev-hover);
+  --shadow-avatar: var(--elev-avatar);
+
+  --text-name: clamp(2.05rem, 1.65rem + 1.6vw, 2.45rem);
+  --text-name--line-height: 1.15;
+  --text-name--letter-spacing: -0.03em;
+  --text-name--font-weight: 500;
+}
+
+:root {
+  --paper: #f4f1ec;
+  --paper-card: #fffcf7;
+  --paper-card-hover: #f7f2ea;
+  --paper-icon: #ebe6dc;
+  --ink: #1a1916;
+  --ink-muted: #6f6a62;
+  --ink-subtle: #8a847b;
+  --line: #e4ddd3;
+  --sage: #4f5f53;
+  --focus: #c9c2b6;
+  --elev:
+    0 0 0 1px rgba(26, 25, 22, 0.06),
+    0 1px 2px -1px rgba(26, 25, 22, 0.06),
+    0 2px 4px 0 rgba(26, 25, 22, 0.04);
+  --elev-hover:
+    0 0 0 1px rgba(26, 25, 22, 0.1),
+    0 8px 20px -10px rgba(26, 25, 22, 0.16),
+    0 2px 6px 0 rgba(26, 25, 22, 0.05);
+  --elev-avatar: 0 16px 36px -16px rgba(26, 25, 22, 0.38);
+
+  --motion-stagger: 40ms;
+  --motion-micro: 80ms;
+  --motion-quick: 150ms;
+  --motion-fast: 250ms;
+  --motion-slow: 400ms;
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.2, 0, 0, 1);
+}
+
+.dark {
+  --paper: #12110f;
+  --paper-card: #1c1a17;
+  --paper-card-hover: #26231f;
+  --paper-icon: #26231f;
+  --ink: #f0ebe3;
+  --ink-muted: #a89f93;
+  --ink-subtle: #7a7369;
+  --line: #2e2a25;
+  --sage: #9aab9c;
+  --focus: #5c564e;
+  --elev: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --elev-hover:
+    0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 10px 24px -12px rgba(0, 0, 0, 0.55);
+  --elev-avatar: 0 18px 40px -16px rgba(0, 0, 0, 0.65);
+}
+
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: var(--paper);
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    min-height: 100dvh;
+    background-color: var(--paper);
+    background-image: radial-gradient(
+      900px 520px at 50% -8%,
+      color-mix(in oklab, var(--sage) 9%, var(--paper)),
+      transparent 70%
+    );
+    color: var(--ink);
+    font-family: var(--font-sans);
+  }
+
+  body::before {
+    content: "";
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.045;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  html.dark body::before {
+    opacity: 0.09;
+    mix-blend-mode: overlay;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.hero-enter,
+.link-enter,
+.social-enter,
+.footer-enter {
+  animation: rise-in var(--motion-slow) var(--ease-smooth-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-enter,
+  .link-enter,
+  .social-enter,
+  .footer-enter {
+    animation: none;
+  }
+
+  .group:hover,
+  button:hover,
+  a:hover {
+    transform: none;
+  }
+}
