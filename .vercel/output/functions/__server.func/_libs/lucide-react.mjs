@@ -226,6 +226,16 @@ var Moon = createLucideIcon("moon", [["path", {
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var Play = createLucideIcon("play", [["polygon", {
+	points: "6 3 20 12 6 21 6 3",
+	key: "1oa8hb"
+}]]);
+/**
+* @license lucide-react v0.510.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var ShoppingBag = createLucideIcon("shopping-bag", [
 	["path", {
 		d: "M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z",
@@ -312,6 +322,19 @@ var TriangleAlert = createLucideIcon("triangle-alert", [
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var X = createLucideIcon("x", [["path", {
+	d: "M18 6 6 18",
+	key: "1bl5f8"
+}], ["path", {
+	d: "m6 6 12 12",
+	key: "d8bk6v"
+}]]);
+/**
+* @license lucide-react v0.510.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var Youtube = createLucideIcon("youtube", [["path", {
 	d: "M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17",
 	key: "1q2vi4"
@@ -320,4 +343,4 @@ var Youtube = createLucideIcon("youtube", [["path", {
 	key: "1jp15x"
 }]]);
 //#endregion
-export { Moon as a, Link2 as c, Camera as d, BookOpen as f, ShoppingBag as i, Instagram as l, TriangleAlert as n, MapPin as o, ArrowUpRight as p, Sun as r, Mail as s, Youtube as t, Check as u };
+export { ShoppingBag as a, MapPin as c, Instagram as d, Check as f, ArrowUpRight as h, Sun as i, Mail as l, BookOpen as m, X as n, Play as o, Camera as p, TriangleAlert as r, Moon as s, Youtube as t, Link2 as u };

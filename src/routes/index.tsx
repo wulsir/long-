@@ -1,14 +1,18 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { LinkCard } from "@/components/link-card";
 import { ProfileHeader } from "@/components/profile-header";
 import { ShareLink } from "@/components/share-link";
 import { SocialRow } from "@/components/social-row";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { VideoModal } from "@/components/video-modal";
 import { featuredLinks, profile } from "@/lib/profile";
 
 export const Route = createFileRoute("/")({ component: Home });
 
 function Home() {
+  const [videoOpen, setVideoOpen] = useState(false);
+
   return (
     <div className="relative min-h-dvh">
       <div
@@ -24,7 +28,7 @@ function Home() {
           paddingTop: "max(4.5rem, calc(env(safe-area-inset-top) + 3.25rem))",
         }}
       >
-        <ProfileHeader />
+        <ProfileHeader onPlayVideo={() => setVideoOpen(true)} />
 
         <nav className="mt-8 flex flex-col gap-2.5" aria-label="精選連結">
           {featuredLinks.map((link, index) => (
@@ -46,6 +50,8 @@ function Home() {
           </p>
         </footer>
       </main>
+
+      <VideoModal open={videoOpen} onClose={() => setVideoOpen(false)} />
     </div>
   );
 }

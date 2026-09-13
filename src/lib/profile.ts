@@ -3,6 +3,7 @@ export type LinkIconId =
   | "instagram"
   | "book"
   | "shop"
+  | "github"
   | "mail"
   | "x"
   | "youtube";
@@ -24,42 +25,43 @@ export const profile = {
   name: "physics",
   nameEn: "physics",
   handle: "@physics",
-  role: "攝影師 · 獨立設計師",
-  bio: "用光影記錄日常，把想法做成可以分享的東西。",
-  location: "台北 Taipei",
-  availability: "開放品牌與編輯合作",
+  role: "物理教師 · AI設計師",
+  bio: "用AI記錄日常，把想法做成可以分享的東西。",
+  location: "桃園 Taoyuan",
+  availability: "物理與AI合作",
   avatar: "/avatar.jpg",
+  video: "/intro.mp4",
   email: "hello@physics.studio",
 } as const;
 
 export const featuredLinks: FeaturedLink[] = [
   {
     title: "作品集",
-    subtitle: "攝影與設計選集",
-    href: "https://are.na/physics",
-    icon: "camera",
+    subtitle: "AI與設計選集",
+    href: "https://github.com/wulsir",
+    icon: "github",
   },
   {
-    title: "Instagram",
-    subtitle: "日常與拍攝現場",
+    title: "社群",
+    subtitle: "AI教育",
     href: "https://instagram.com/physics",
     icon: "instagram",
   },
   {
-    title: "寫作筆記",
+    title: "AI寫作筆記",
     subtitle: "關於觀看與製作",
     href: "https://physics.studio/notes",
     icon: "book",
   },
   {
-    title: "限量印刷",
-    subtitle: "海報、小誌與相本",
+    title: "免費AI資源",
+    subtitle: "遊戲與影片製作",
     href: "https://physics.studio/shop",
     icon: "shop",
   },
   {
     title: "合作洽詢",
-    subtitle: "品牌、雜誌與空間案",
+    subtitle: "品牌、AI與設計案件",
     href: `mailto:${profile.email}`,
     icon: "mail",
   },
