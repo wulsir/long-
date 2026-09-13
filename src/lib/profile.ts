@@ -44,19 +44,19 @@ export const featuredLinks: FeaturedLink[] = [
   {
     title: "社群",
     subtitle: "AI教育",
-    href: "https://instagram.com/physics",
+    href: "https://instagram.com/physicslong",
     icon: "instagram",
   },
   {
     title: "AI寫作筆記",
     subtitle: "關於觀看與製作",
-    href: "https://physics.studio/notes",
+    href: "https://physicslong.studio/notes",
     icon: "book",
   },
   {
     title: "免費AI資源",
     subtitle: "遊戲與影片製作",
-    href: "https://physics.studio/shop",
+    href: "https://physicslong.studio/shop",
     icon: "shop",
   },
   {
@@ -70,13 +70,13 @@ export const featuredLinks: FeaturedLink[] = [
 export const socialLinks: SocialLink[] = [
   {
     label: "Instagram",
-    href: "https://instagram.com/physics",
+    href: "https://instagram.com/physicslong",
     icon: "instagram",
   },
   { label: "X", href: "https://x.com/physicslong", icon: "x" },
   {
     label: "YouTube",
-    href: "https://youtube.com/@Quantumlogic-rd1sv",
+    href: "https://www.youtube.com/@Quantumlogic-rd1sv",
     icon: "youtube",
   },
   { label: "Email", href: `mailto:${profile.email}`, icon: "mail" },
