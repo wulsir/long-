@@ -76,7 +76,7 @@ export const socialLinks: SocialLink[] = [
   { label: "X", href: "https://x.com/physicslong", icon: "x" },
   {
     label: "YouTube",
-    href: "https://youtube.com/@Quantum",
+    href: "https://youtube.com/@Quantum logic",
     icon: "youtube",
   },
   { label: "Email", href: `mailto:${profile.email}`, icon: "mail" },
