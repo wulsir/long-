@@ -22,16 +22,16 @@ export type SocialLink = {
 };
 
 export const profile = {
-  name: "physics",
-  nameEn: "physics",
-  handle: "@physics",
+  name: "physics long",
+  nameEn: "physics long",
+  handle: "@physicslong",
   role: "物理教師 · AI設計師",
   bio: "用AI記錄日常，把想法做成可以分享的東西。",
   location: "桃園 Taoyuan",
   availability: "物理與AI合作",
   avatar: "/avatar.jpg",
   video: "/intro.mp4",
-  email: "hello@physics.studio",
+  email: "hello@physicslong.studio",
 } as const;
 
 export const featuredLinks: FeaturedLink[] = [
@@ -73,10 +73,10 @@ export const socialLinks: SocialLink[] = [
     href: "https://instagram.com/physics",
     icon: "instagram",
   },
-  { label: "X", href: "https://x.com/physics", icon: "x" },
+  { label: "X", href: "https://x.com/physicslong", icon: "x" },
   {
     label: "YouTube",
-    href: "https://youtube.com/@physics",
+    href: "https://youtube.com/@Quantum",
     icon: "youtube",
   },
   { label: "Email", href: `mailto:${profile.email}`, icon: "mail" },
