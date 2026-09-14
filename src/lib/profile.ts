@@ -8,11 +8,22 @@ export type LinkIconId =
   | "x"
   | "youtube";
 
+export type SubLink = {
+  label: string;
+  href: string;
+};
+
 export type FeaturedLink = {
   title: string;
   subtitle: string;
   href: string;
   icon: LinkIconId;
+  /**
+   * 選填：如果填了這個欄位，按下這張卡片時會彈出一個選單，
+   * 列出下面這些連結，而不是直接跳轉到 href。
+   * 要新增/刪除/修改 AI 網站，直接編輯下面的陣列即可。
+   */
+  subLinks?: SubLink[];
 };
 
 export type SocialLink = {
@@ -58,6 +69,16 @@ export const featuredLinks: FeaturedLink[] = [
     subtitle: "遊戲與影片製作",
     href: "https://grok.com/",
     icon: "shop",
+    // 👇 在這裡新增／刪除／修改 AI 網站入口，格式都一樣：
+    //    { label: "顯示名稱", href: "網址" },
+    subLinks: [
+      { label: "Claude", href: "https://claude.ai/" },
+      { label: "ChatGPT", href: "https://chatgpt.com/" },
+      { label: "Grok", href: "https://grok.com/" },
+      { label: "Meta AI", href: "https://www.meta.ai/" },
+      { label: "Gemini", href: "https://gemini.google.com/" },
+      // { label: "新的AI網站", href: "https://example.com/" },
+    ],
   },
   {
     title: "合作洽詢",
