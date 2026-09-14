@@ -56,7 +56,7 @@ export const featuredLinks: FeaturedLink[] = [
   {
     title: "免費AI資源",
     subtitle: "遊戲與影片製作",
-    href: "https://physicslong.studio/shop",
+    href: "https://grok.com/",
     icon: "shop",
   },
   {
