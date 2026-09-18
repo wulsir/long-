@@ -60,13 +60,13 @@ export const featuredLinks: FeaturedLink[] = [
   },
   {
     title: "AI寫作筆記",
-    subtitle: "關於觀看與製作",
+    subtitle: "關於AI文章隨想與影片及遊戲製作",
     href: "https://physicslong.studio/notes",
     icon: "book",
   },
   {
     title: "免費AI資源",
-    subtitle: "遊戲與影片製作",
+    subtitle: "好用的5大AI",
     href: "https://grok.com/",
     icon: "shop",
     // 👇 在這裡新增／刪除／修改 AI 網站入口，格式都一樣：
