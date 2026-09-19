@@ -39,13 +39,13 @@ export const profile = {
   availability: "物理與AI合作",
   avatar: "/avatar.jpg",
   video: "/intro.mp4",
-  email: "hello@physicslong.studio",
+  email: "wul@go.pymhs.tyc.edu.tw",
 } as const;
 
 export const featuredLinks: FeaturedLink[] = [
   {
     title: "作品集",
-    subtitle: "AI與設計選集",
+    subtitle: "AI與設計作品集",
     href: "https://github.com/wulsir",
     icon: "github",
   },
