@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { LinkCard } from "@/components/link-card";
+import { LogicQuiz } from "@/components/logic-quiz";
 import { ProfileHeader } from "@/components/profile-header";
 import { ShareLink } from "@/components/share-link";
 import { SocialRow } from "@/components/social-row";
@@ -12,6 +13,7 @@ export const Route = createFileRoute("/")({ component: Home });
 
 function Home() {
   const [videoOpen, setVideoOpen] = useState(false);
+  const [quizOpen, setQuizOpen] = useState(false);
 
   return (
     <div className="relative min-h-dvh">
@@ -32,7 +34,12 @@ function Home() {
 
         <nav className="mt-8 flex flex-col gap-2.5" aria-label="精選連結">
           {featuredLinks.map((link, index) => (
-            <LinkCard key={link.title} link={link} index={index} />
+            <LinkCard
+              key={link.title}
+              link={link}
+              index={index}
+              onOpenQuiz={() => setQuizOpen(true)}
+            />
           ))}
         </nav>
 
@@ -52,6 +59,7 @@ function Home() {
       </main>
 
       <VideoModal open={videoOpen} onClose={() => setVideoOpen(false)} />
+      <LogicQuiz open={quizOpen} onClose={() => setQuizOpen(false)} />
     </div>
   );
 }

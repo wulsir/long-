@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowUpRight, ChevronDown } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Play } from "lucide-react";
 import { LinkIcon } from "@/components/icons";
 import { LinkOptionsSheet } from "@/components/link-options-sheet";
 import type { FeaturedLink } from "@/lib/profile";
@@ -8,13 +8,16 @@ import { cn } from "@/lib/utils";
 export function LinkCard({
   link,
   index,
+  onOpenQuiz,
 }: {
   link: FeaturedLink;
   index: number;
+  onOpenQuiz?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const external = link.href.startsWith("http");
   const hasOptions = Boolean(link.subLinks && link.subLinks.length > 0);
+  const isQuiz = link.action === "quiz";
 
   const cardClassName = cn(
     "link-enter group relative flex min-h-14 w-full items-center gap-3 rounded-3xl bg-card p-3",
@@ -23,6 +26,35 @@ export function LinkCard({
     "hover:-translate-y-0.5 hover:bg-card-hover hover:shadow-card-hover",
     "active:scale-[0.96] active:shadow-card",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+  );
+
+  const trailing = isQuiz ? (
+    <Play
+      className={cn(
+        "ml-0.5 size-4 shrink-0 fill-subtle text-subtle",
+        "transition-[color,fill,transform] duration-[var(--motion-quick)] ease-[var(--ease-out)]",
+        "group-hover:fill-foreground group-hover:text-foreground",
+      )}
+      strokeWidth={1.75}
+    />
+  ) : hasOptions ? (
+    <ChevronDown
+      className={cn(
+        "size-4 shrink-0 text-subtle",
+        "transition-transform duration-[var(--motion-quick)] ease-[var(--ease-out)]",
+        "group-hover:text-foreground",
+      )}
+      strokeWidth={1.75}
+    />
+  ) : (
+    <ArrowUpRight
+      className={cn(
+        "size-4 shrink-0 text-subtle",
+        "transition-transform duration-[var(--motion-quick)] ease-[var(--ease-out)]",
+        "group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground",
+      )}
+      strokeWidth={1.75}
+    />
   );
 
   const cardContent = (
@@ -38,27 +70,23 @@ export function LinkCard({
           {link.subtitle}
         </span>
       </span>
-      {hasOptions ? (
-        <ChevronDown
-          className={cn(
-            "size-4 shrink-0 text-subtle",
-            "transition-transform duration-[var(--motion-quick)] ease-[var(--ease-out)]",
-            "group-hover:text-foreground",
-          )}
-          strokeWidth={1.75}
-        />
-      ) : (
-        <ArrowUpRight
-          className={cn(
-            "size-4 shrink-0 text-subtle",
-            "transition-transform duration-[var(--motion-quick)] ease-[var(--ease-out)]",
-            "group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground",
-          )}
-          strokeWidth={1.75}
-        />
-      )}
+      {trailing}
     </>
   );
+
+  if (isQuiz) {
+    return (
+      <button
+        type="button"
+        onClick={onOpenQuiz}
+        style={{ animationDelay: `${180 + index * 70}ms` }}
+        className={cardClassName}
+        aria-haspopup="dialog"
+      >
+        {cardContent}
+      </button>
+    );
+  }
 
   if (hasOptions) {
     return (

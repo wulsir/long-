@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  Brain,
   Camera,
   Github,
   Instagram,
@@ -32,6 +33,7 @@ const lucideMap: Record<Exclude<LinkIconId, "x">, LucideIcon> = {
   mail: Mail,
   youtube: Youtube,
   github: Github,
+  brain: Brain,
 };
 
 export function LinkIcon({
