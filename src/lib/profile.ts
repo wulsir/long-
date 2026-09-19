@@ -53,7 +53,7 @@ export const featuredLinks: FeaturedLink[] = [
     icon: "github",
   },
   {
-    title: "社群",
+    title: "基本邏輯測驗",
     subtitle: "AI教育",
     href: "https://instagram.com/physicslong",
     icon: "instagram",
