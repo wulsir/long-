@@ -39,7 +39,7 @@ export const profile = {
   availability: "物理與AI合作",
   avatar: "/avatar.jpg",
   video: "/intro.mp4",
-  email: "hello@physicslong.studio",
+  email: "wul@go.pymsh.tyc.edu.tw",
 } as const;
 
 export const featuredLinks: FeaturedLink[] = [
