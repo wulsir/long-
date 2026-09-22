@@ -38,6 +38,9 @@
   --line: #e4ddd3;
   --sage: #4f5f53;
   --focus: #c9c2b6;
+  --maple-amber: #c47a3a;
+  --maple-rust: #b35a32;
+  --maple-wine: #8a4336;
   --elev:
     0 0 0 1px rgba(26, 25, 22, 0.06),
     0 1px 2px -1px rgba(26, 25, 22, 0.06),
@@ -69,6 +72,9 @@
   --line: #2e2a25;
   --sage: #9aab9c;
   --focus: #5c564e;
+  --maple-amber: #d59a5c;
+  --maple-rust: #c27852;
+  --maple-wine: #c4897a;
   --elev: 0 0 0 1px rgba(255, 255, 255, 0.08);
   --elev-hover:
     0 0 0 1px rgba(255, 255, 255, 0.14),
@@ -152,12 +158,76 @@
   animation: rise-in var(--motion-slow) var(--ease-smooth-out) both;
 }
 
+.maple-layer {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  overflow: hidden;
+}
+
+.maple-leaf {
+  position: absolute;
+  top: -12vh;
+  display: block;
+  color: var(--maple-amber);
+  opacity: 0.6;
+  transform-origin: center;
+  will-change: transform;
+  animation-name: maple-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.maple-leaf svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: center;
+  animation: maple-sway 3.6s ease-in-out infinite alternate;
+  filter: drop-shadow(0 4px 6px color-mix(in oklab, var(--ink) 16%, transparent));
+}
+
+.maple-leaf-0 {
+  color: var(--maple-amber);
+}
+.maple-leaf-1 {
+  color: var(--maple-rust);
+  opacity: 0.64;
+}
+.maple-leaf-2 {
+  color: var(--maple-wine);
+  opacity: 0.58;
+}
+
+@keyframes maple-fall {
+  from {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  to {
+    transform: translate3d(var(--maple-drift), 118vh, 0) rotate(var(--maple-spin));
+  }
+}
+
+@keyframes maple-sway {
+  from {
+    transform: rotate(-16deg) translateX(-5px);
+  }
+  to {
+    transform: rotate(14deg) translateX(7px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-enter,
   .link-enter,
   .social-enter,
   .footer-enter {
     animation: none;
+  }
+
+  .maple-layer {
+    display: none;
   }
 
   .group:hover,

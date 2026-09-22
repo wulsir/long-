@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { AutumnAudio } from "@/components/autumn-audio";
 import { LinkCard } from "@/components/link-card";
 import { LogicQuiz } from "@/components/logic-quiz";
+import { MapleFall } from "@/components/maple-fall";
 import { ProfileHeader } from "@/components/profile-header";
 import { ShareLink } from "@/components/share-link";
 import { SocialRow } from "@/components/social-row";
@@ -17,15 +19,17 @@ function Home() {
 
   return (
     <div className="relative min-h-dvh">
+      <MapleFall />
       <div
-        className="absolute right-4 z-10 sm:right-6"
+        className="absolute right-4 z-20 flex items-center gap-2 sm:right-6"
         style={{ top: "max(1rem, env(safe-area-inset-top))" }}
       >
+        <AutumnAudio ducked={videoOpen} />
         <ThemeToggle />
       </div>
 
       <main
-        className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-12"
+        className="relative z-10 mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pb-12"
         style={{
           paddingTop: "max(4.5rem, calc(env(safe-area-inset-top) + 3.25rem))",
         }}

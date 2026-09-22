@@ -9,7 +9,8 @@ function readIsDark() {
 function applyTheme(dark: boolean) {
   document.documentElement.classList.toggle("dark", dark);
   document.documentElement.style.colorScheme = dark ? "dark" : "light";
-  localStorage.setItem("lin-theme", dark ? "dark" : "light");
+  localStorage.setItem("physics-theme", dark ? "dark" : "light");
+  localStorage.removeItem("lin-theme");
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute("content", dark ? "#12110f" : "#f4f1ec");
 }

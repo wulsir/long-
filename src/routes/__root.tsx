@@ -3,8 +3,8 @@ import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import appCss from "../styles.css?url";
 
-const APP_NAME = "physics";
-const THEME_BOOTSTRAP = `(function(){try{var t=localStorage.getItem("lin-theme");var d=window.matchMedia("(prefers-color-scheme: dark)").matches;var dark=t==="dark"||((t===null||t==="system")&&d);document.documentElement.classList.toggle("dark",dark);document.documentElement.style.colorScheme=dark?"dark":"light";}catch(e){}})();`;
+const APP_NAME = "physics long";
+const THEME_BOOTSTRAP = `(function(){try{var t=localStorage.getItem("physics-theme")||localStorage.getItem("lin-theme");if(t){try{localStorage.setItem("physics-theme",t);localStorage.removeItem("lin-theme");}catch(e){}}var d=window.matchMedia("(prefers-color-scheme: dark)").matches;var dark=t==="dark"||((t===null||t==="system")&&d);document.documentElement.classList.toggle("dark",dark);document.documentElement.style.colorScheme=dark?"dark":"light";}catch(e){}})();`;
 
 export const Route = createRootRoute({
   head: () => ({
