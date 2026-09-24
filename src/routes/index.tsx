@@ -59,6 +59,11 @@ function Home() {
           <p className="text-xs text-subtle">
             © {new Date().getFullYear()} {profile.name}
           </p>
+          <p className="text-[11px] text-subtle/80">
+            音樂：蕭邦〈練習曲 Op.10 No.3・離別〉
+            <br />
+            鋼琴：Edward Neeman（Musopen 公有領域演奏）
+          </p>
         </footer>
       </main>
 

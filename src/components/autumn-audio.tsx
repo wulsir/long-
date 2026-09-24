@@ -23,7 +23,7 @@ export function AutumnAudio({ ducked }: { ducked: boolean }) {
     const audio = audioRef.current;
     if (!audio || !ready) return;
 
-    audio.volume = ducked ? 0.12 : 0.38;
+    audio.volume = ducked ? 0.12 : 0.48;
 
     if (!on) {
       audio.pause();
@@ -53,14 +53,15 @@ export function AutumnAudio({ ducked }: { ducked: boolean }) {
   }, [on, ready, ducked]);
 
   function toggle() {
-    const next = !on;
+    const audio = audioRef.current;
+    const playing = Boolean(audio && !audio.paused && on);
+    const next = !playing;
     setOn(next);
     try {
       localStorage.setItem(MUSIC_KEY, next ? "on" : "off");
     } catch {
       /* ignore */
     }
-    const audio = audioRef.current;
     if (!audio) return;
     if (next) {
       const play = audio.play();
@@ -74,7 +75,7 @@ export function AutumnAudio({ ducked }: { ducked: boolean }) {
     <>
       <audio
         ref={audioRef}
-        src="/audio/autumn.mp3"
+        src="/audio/chopin-tristesse.mp3"
         loop
         preload="auto"
         playsInline
@@ -83,7 +84,7 @@ export function AutumnAudio({ ducked }: { ducked: boolean }) {
         type="button"
         onClick={toggle}
         aria-pressed={on}
-        aria-label={on ? "關閉秋意音樂" : "播放秋意音樂"}
+        aria-label={on ? "關閉音樂" : "播放蕭邦〈離別〉"}
         className={cn(
           "relative flex size-11 items-center justify-center rounded-full",
           "bg-card text-foreground shadow-card",
