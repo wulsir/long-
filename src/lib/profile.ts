@@ -11,7 +11,8 @@ export type LinkIconId =
 
 export type SubLink = {
   label: string;
-  href: string;
+  href?: string;
+  children?: SubLink[];
 };
 
 export type FeaturedLink = {
@@ -64,7 +65,7 @@ export const featuredLinks: FeaturedLink[] = [
   },
   {
     title: "免費AI資源",
-    subtitle: "好用的5大AI",
+    subtitle: "5大好用AI和2個agent AI",
     href: "https://grok.com/",
     icon: "shop",
     subLinks: [
@@ -73,6 +74,16 @@ export const featuredLinks: FeaturedLink[] = [
       { label: "Grok", href: "https://grok.com/" },
       { label: "Meta AI", href: "https://www.meta.ai/" },
       { label: "Gemini", href: "https://gemini.google.com/" },
+      {
+        label: "工作流AI",
+        children: [
+          {
+            label: "Hermas agent",
+            href: "https://hermes-agent.nousresearch.com/",
+          },
+          { label: "Manus", href: "https://manus.im/" },
+        ],
+      },
     ],
   },
   {
