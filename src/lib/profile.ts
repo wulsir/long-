@@ -60,8 +60,13 @@ export const featuredLinks: FeaturedLink[] = [
   {
     title: "AI寫作筆記",
     subtitle: "關於AI文章隨想與影片及遊戲製作",
-    href: "https://physicslong.studio/notes",
+    href: "#",
     icon: "book",
+    subLinks: [
+      { label: "AI文章隨想", href: "/文章隨想散文集整理.docx" },
+      { label: "影片製作", href: "#" },
+      { label: "遊戲製作", href: "#" },
+    ],
   },
   {
     title: "免費AI資源",
