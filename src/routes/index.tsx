@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { AutumnAudio } from "@/components/autumn-audio";
+import { RecentUpdates } from "@/components/recent-updates";
 import { LinkCard } from "@/components/link-card";
 import { LogicQuiz } from "@/components/logic-quiz";
 import { MapleFall } from "@/components/maple-fall";
@@ -46,6 +47,8 @@ function Home() {
             />
           ))}
         </nav>
+
+        <RecentUpdates />
 
         <div className="mt-8">
           <SocialRow />
