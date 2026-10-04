@@ -97,7 +97,7 @@ export const featuredLinks: FeaturedLink[] = [
     href: "#physics-ai",
     icon: "brain",
     subLinks: [
-      { label: "物理AI教學影片", href: "https://example.com/AI剪片_企鵝_走動版_v4.mp4" },
+      { label: "物理AI教學影片", href: "https://youtu.be/TmxfccWpFWo?si=-bvrT1cRg63NRD0K" },
       { label: "物理AI實驗動畫", href: "#experiment" },
     ],
   },
