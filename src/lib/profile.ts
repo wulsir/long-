@@ -92,6 +92,12 @@ export const featuredLinks: FeaturedLink[] = [
     ],
   },
   {
+    title: "合作洽詢",
+    subtitle: "品牌、AI與設計案件",
+    href: `mailto:${profile.email}`,
+    icon: "mail",
+  },
+  {
     title: "物理與AI合作",
     subtitle: "物理AI教學影片 · 物理AI實驗動畫",
     href: "#physics-ai",
