@@ -40,7 +40,7 @@ export const profile = {
   availability: "物理與AI合作",
   avatar: "/avatar.jpg",
   video: "/intro.mp4",
-  email: "wul@go.ymhs.tyc.edu.tw",
+  email: "wul@go.pymhs.tyc.edu.tw",
 } as const;
 
 export const featuredLinks: FeaturedLink[] = [
