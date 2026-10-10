@@ -1,0 +1,200 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --paper: #f4f1ec;
+  --card: #fffcf7;
+  --card-hover: #f7f2ea;
+  --wash: #ebe6dc;
+  --ink: #1a1916;
+  --muted: #6f6a62;
+  --subtle: #8a847b;
+  --line: #e4ddd3;
+  --sage: #4f5f53;
+  --focus: #c9c2b6;
+  --maple-amber: #c47a3a;
+  --maple-rust: #b35a32;
+  --maple-wine: #8a4336;
+  --elev: 0 0 0 1px #1a19160f, 0 1px 2px -1px #1a19160f, 0 2px 4px #1a19160a;
+  --elev-hover: 0 0 0 1px #1a19161a, 0 8px 20px -10px #1a191629, 0 2px 6px #1a19160d;
+  --elev-avatar: 0 16px 36px -16px #1a191661;
+  color-scheme: light;
+}
+
+.dark {
+  --paper: #12110f;
+  --card: #1c1a17;
+  --card-hover: #26231f;
+  --wash: #26231f;
+  --ink: #f0ebe3;
+  --muted: #a89f93;
+  --subtle: #7a7369;
+  --line: #2e2a25;
+  --sage: #9aab9c;
+  --focus: #5c564e;
+  --maple-amber: #d59a5c;
+  --maple-rust: #c27852;
+  --maple-wine: #c4897a;
+  --elev: 0 0 0 1px #ffffff14;
+  --elev-hover: 0 0 0 1px #ffffff24, 0 10px 24px -12px #0000008c;
+  --elev-avatar: 0 18px 40px -16px #000000a6;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: "Noto Sans TC", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Noto Serif TC", "Times New Roman", serif;
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
+  --color-wash: var(--wash);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-line: var(--line);
+  --color-sage: var(--sage);
+  --color-focus: var(--focus);
+  --shadow-card: var(--elev);
+  --shadow-card-hover: var(--elev-hover);
+  --shadow-avatar: var(--elev-avatar);
+}
+
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  html {
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  body {
+    min-height: 100dvh;
+    background:
+      radial-gradient(ellipse 70% 42% at 50% -8%, color-mix(in oklab, var(--sage) 14%, transparent), transparent 68%),
+      var(--paper);
+    font-family: var(--font-sans);
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--sage) 28%, transparent);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes maple-fall {
+  from {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  to {
+    transform: translate3d(var(--maple-drift), 115vh, 0) rotate(var(--maple-spin));
+  }
+}
+
+@keyframes maple-sway {
+  from {
+    transform: rotate(-14deg);
+  }
+  to {
+    transform: rotate(12deg);
+  }
+}
+
+@keyframes orbit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orbit-spin-reverse {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+.rise-in {
+  animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.maple-layer {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  overflow: hidden;
+}
+
+.maple-leaf {
+  position: absolute;
+  top: -12vh;
+  display: block;
+  opacity: 0.55;
+  animation-name: maple-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.maple-leaf svg {
+  width: 100%;
+  height: 100%;
+  animation: maple-sway 3.8s ease-in-out infinite alternate;
+}
+
+.maple-0 {
+  color: var(--maple-amber);
+}
+.maple-1 {
+  color: var(--maple-rust);
+  opacity: 0.5;
+}
+.maple-2 {
+  color: var(--maple-wine);
+  opacity: 0.42;
+}
+
+.bg-sage-tint {
+  background: color-mix(in oklab, var(--sage) 14%, var(--card));
+}
+
+.orbit-spin {
+  animation: orbit-spin 28s linear infinite;
+  transform-origin: center;
+}
+
+.orbit-spin-reverse {
+  animation: orbit-spin-reverse 36s linear infinite;
+  transform-origin: center;
+}
+
+.orbit-spin-inner {
+  animation: orbit-spin 20s linear infinite;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise-in,
+  .orbit-spin,
+  .orbit-spin-reverse,
+  .orbit-spin-inner,
+  .maple-leaf,
+  .maple-leaf svg {
+    animation: none;
+  }
+
+  .maple-layer {
+    display: none;
+  }
+}
