@@ -55,6 +55,7 @@
   --color-line: var(--line);
   --color-sage: var(--sage);
   --color-focus: var(--focus);
+  --color-maple-amber: var(--maple-amber);
   --shadow-card: var(--elev);
   --shadow-card-hover: var(--elev-hover);
   --shadow-avatar: var(--elev-avatar);
@@ -163,14 +164,31 @@
   background: color-mix(in oklab, var(--sage) 14%, var(--card));
 }
 
-.orbit-spin {
-  animation: orbit-spin 28s linear infinite;
+/* inner: counter-clockwise, outer: clockwise */
+.orbit-inner {
+  animation: orbit-spin 14s linear infinite reverse;
   transform-origin: center;
+}
+
+.orbit-outer {
+  animation: orbit-spin 24s linear infinite;
+  transform-origin: center;
+}
+
+/* counter-rotate so the labels stay upright while orbiting */
+.orbit-ball-inner {
+  animation: orbit-spin 14s linear infinite;
+}
+
+.orbit-ball-outer {
+  animation: orbit-spin 24s linear infinite reverse;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .rise-in,
-  .orbit-spin,
+  .orbit-inner,
+  .orbit-outer,
+  .orbit-ball,
   .maple-leaf,
   .maple-leaf svg {
     animation: none;

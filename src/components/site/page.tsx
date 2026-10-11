@@ -87,8 +87,19 @@ function Identity({ onPlay }: { onPlay: () => void }) {
         aria-label="播放動態影像"
         className="relative rounded-full transition-transform duration-200 ease-out hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
       >
-        <span className="orbit-spin pointer-events-none absolute -inset-3 rounded-full border border-sage/40" aria-hidden="true">
-          <span className="absolute top-0 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sage" />
+        <span className="orbit-inner pointer-events-none absolute -inset-3 rounded-full border border-sage/40" aria-hidden="true">
+          <span className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <span className="orbit-ball orbit-ball-inner flex size-8 items-center justify-center rounded-full bg-sage text-[11px] leading-none font-medium text-paper shadow-card">
+              物理
+            </span>
+          </span>
+        </span>
+        <span className="orbit-outer pointer-events-none absolute -inset-9 rounded-full border border-maple-amber/40" aria-hidden="true">
+          <span className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2">
+            <span className="orbit-ball orbit-ball-outer flex size-8 items-center justify-center rounded-full bg-maple-amber text-[11px] leading-none font-semibold text-paper shadow-card">
+              AI
+            </span>
+          </span>
         </span>
         <img
           src={profile.avatar}
@@ -101,7 +112,7 @@ function Identity({ onPlay }: { onPlay: () => void }) {
           <Play className="size-3.5 translate-x-px" strokeWidth={1.75} />
         </span>
       </button>
-      <h1 className="mt-5 font-display text-4xl tracking-tight text-ink">{profile.name}</h1>
+      <h1 className="mt-11 font-display text-4xl tracking-tight text-ink">{profile.name}</h1>
       <p className="mt-1 text-sm text-muted">{profile.handle}</p>
       <p className="mt-3 text-sm font-medium text-ink">{profile.role}</p>
       <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted">{profile.bio}</p>
