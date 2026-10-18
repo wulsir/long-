@@ -23,7 +23,7 @@ export type LinkItem = {
   subtitle: string;
   href?: string;
   icon: "github" | "brain" | "book" | "spark" | "mail";
-  action?: "quiz";
+  action?: "quiz" | "physicsQuiz";
   subLinks?: SubLink[];
 };
 
@@ -40,6 +40,13 @@ export const links: LinkItem[] = [
     href: "#logic-quiz",
     icon: "brain",
     action: "quiz",
+  },
+  {
+    title: "物理概念",
+    subtitle: "力學 · 波動 · 能量 · 互動答題",
+    href: "#physics-quiz",
+    icon: "brain",
+    action: "physicsQuiz",
   },
   {
     title: "AI 寫作筆記",

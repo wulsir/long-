@@ -35,6 +35,7 @@ import { cn } from "@/lib/cn";
 import { MapleField } from "@/components/site/maple";
 import { LinkSheet } from "@/components/site/sheet";
 import { QuizDialog } from "@/components/site/quiz";
+import { PhysicsQuizDialog } from "@/components/site/physics-quiz";
 
 const iconButton =
   "flex size-11 items-center justify-center rounded-full bg-card text-ink shadow-card transition-[transform,box-shadow,background-color] duration-200 ease-out hover:-translate-y-px hover:bg-card-hover hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus";
@@ -45,6 +46,7 @@ const linkCard =
 export function HomePage() {
   const [videoOpen, setVideoOpen] = useState(false);
   const [quizOpen, setQuizOpen] = useState(false);
+  const [physicsQuizOpen, setPhysicsQuizOpen] = useState(false);
 
   return (
     <div className="relative min-h-dvh overflow-x-hidden">
@@ -65,7 +67,7 @@ export function HomePage() {
           <div className="flex min-w-0 flex-col gap-8">
             <SlipCard />
             <Featured />
-            <LinkList onQuiz={() => setQuizOpen(true)} />
+            <LinkList onQuiz={() => setQuizOpen(true)} onPhysicsQuiz={() => setPhysicsQuizOpen(true)} />
             <Rhythm />
             <Updates />
             <Footer />
@@ -74,6 +76,7 @@ export function HomePage() {
       </main>
       <VideoDialog open={videoOpen} onClose={() => setVideoOpen(false)} />
       <QuizDialog open={quizOpen} onClose={() => setQuizOpen(false)} />
+      <PhysicsQuizDialog open={physicsQuizOpen} onClose={() => setPhysicsQuizOpen(false)} />
     </div>
   );
 }
@@ -281,18 +284,18 @@ function Featured() {
   );
 }
 
-function LinkList({ onQuiz }: { onQuiz: () => void }) {
+function LinkList({ onQuiz, onPhysicsQuiz }: { onQuiz: () => void; onPhysicsQuiz: () => void }) {
   return (
     <nav aria-label="精選連結" className="flex flex-col gap-2.5">
       <p className="text-xs font-medium tracking-wide text-subtle">入口</p>
       {links.map((link) => (
-        <LinkRow key={link.title} link={link} onQuiz={onQuiz} />
+        <LinkRow key={link.title} link={link} onQuiz={onQuiz} onPhysicsQuiz={onPhysicsQuiz} />
       ))}
     </nav>
   );
 }
 
-function LinkRow({ link, onQuiz }: { link: LinkItem; onQuiz: () => void }) {
+function LinkRow({ link, onQuiz, onPhysicsQuiz }: { link: LinkItem; onQuiz: () => void; onPhysicsQuiz: () => void }) {
   const [open, setOpen] = useState(false);
   const external = Boolean(link.href?.startsWith("http") || link.href?.startsWith("mailto"));
   const nested = Boolean(link.subLinks?.length);
@@ -305,7 +308,7 @@ function LinkRow({ link, onQuiz }: { link: LinkItem; onQuiz: () => void }) {
         <span className="block font-medium text-ink">{link.title}</span>
         <span className="mt-0.5 block text-sm text-muted">{link.subtitle}</span>
       </span>
-      {link.action === "quiz" ? (
+      {link.action === "quiz" || link.action === "physicsQuiz" ? (
         <Play className="size-4 shrink-0 text-subtle group-hover:text-ink" strokeWidth={1.75} />
       ) : nested ? (
         <ChevronDown className="size-4 shrink-0 text-subtle" strokeWidth={1.75} />
@@ -318,6 +321,14 @@ function LinkRow({ link, onQuiz }: { link: LinkItem; onQuiz: () => void }) {
   if (link.action === "quiz") {
     return (
       <button type="button" onClick={onQuiz} className={linkCard} aria-haspopup="dialog">
+        {body}
+      </button>
+    );
+  }
+
+  if (link.action === "physicsQuiz") {
+    return (
+      <button type="button" onClick={onPhysicsQuiz} className={linkCard} aria-haspopup="dialog">
         {body}
       </button>
     );
