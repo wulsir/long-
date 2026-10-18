@@ -36,6 +36,7 @@ import { MapleField } from "@/components/site/maple";
 import { LinkSheet } from "@/components/site/sheet";
 import { QuizDialog } from "@/components/site/quiz";
 import { PhysicsQuizDialog } from "@/components/site/physics-quiz";
+import { Heatmap } from "@/components/site/heatmap";
 
 const iconButton =
   "flex size-11 items-center justify-center rounded-full bg-card text-ink shadow-card transition-[transform,box-shadow,background-color] duration-200 ease-out hover:-translate-y-px hover:bg-card-hover hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus";
@@ -69,6 +70,7 @@ export function HomePage() {
             <Featured />
             <LinkList onQuiz={() => setQuizOpen(true)} onPhysicsQuiz={() => setPhysicsQuizOpen(true)} />
             <Rhythm />
+            <Heatmap />
             <Updates />
             <Footer />
           </div>
