@@ -63,7 +63,7 @@ export const featuredLinks: FeaturedLink[] = [
     href: "#",
     icon: "book",
     subLinks: [
-      { label: "AI文章隨想", href: "https://docs.google.com/document/d/19nUmtO3kQe6uXclO-xZjYuE_7Mz4Te7U/view?usp=sharing" },
+      { label: "AI文章隨想", href: "https://docs.google.com/document/d/1ENKuMIIA1HyTDJHCnG4mq206ToJYElJZ/edit?usp=drive_link&ouid=104819613392939956914&rtpof=true&sd=true" },
       { label: "影片製作", href: "#" },
       { label: "遊戲製作", href: "#" },
     ],

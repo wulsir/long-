@@ -56,7 +56,7 @@ export const links: LinkItem[] = [
     subLinks: [
       {
         label: "AI 文章隨想",
-        href: "https://docs.google.com/document/d/19nUmtO3kQe6uXclO-xZjYuE_7Mz4Te7U/view?usp=sharing",
+        href: "https://docs.google.com/document/d/1ENKuMIIA1HyTDJHCnG4mq206ToJYElJZ/edit?usp=drive_link&ouid=104819613392939956914&rtpof=true&sd=true",
       },
       {
         label: "影片製作",
@@ -182,7 +182,7 @@ export const updates: { date: string; type: string; title: string; href?: string
     date: "09-27",
     type: "筆記",
     title: "AI 文章隨想上線",
-    href: "https://docs.google.com/document/d/19nUmtO3kQe6uXclO-xZjYuE_7Mz4Te7U/view?usp=sharing",
+    href: "https://docs.google.com/document/d/1ENKuMIIA1HyTDJHCnG4mq206ToJYElJZ/edit?usp=drive_link&ouid=104819613392939956914&rtpof=true&sd=true",
   },
   { date: "09-27", type: "分享", title: "短篇散文「宿命的喚醒」" },
   {

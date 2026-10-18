@@ -13,7 +13,7 @@ export const articles: Article[] = [
     title: "AI 文章隨想",
     excerpt: "用 AI 記錄日常，把想法做成可以分享的東西。從物理教學到 AI 設計，記錄每個靈光乍現的瞬間。",
     keywords: ["AI", "隨想", "記錄", "分享", "教學"],
-    href: "https://docs.google.com/document/d/19nUmtO3kQe6uXclO-xZjYuE_7Mz4Te7U/view?usp=sharing",
+    href: "https://docs.google.com/document/d/1ENKuMIIA1HyTDJHCnG4mq206ToJYElJZ/edit?usp=drive_link&ouid=104819613392939956914&rtpof=true&sd=true",
     date: "09-27",
   },
   {
@@ -21,7 +21,7 @@ export const articles: Article[] = [
     title: "宿命的喚醒",
     excerpt: "短篇散文。關於記憶、時間，和那些以為忘記卻又想起的時刻。",
     keywords: ["散文", "宿命", "記憶", "時間"],
-    href: "https://docs.google.com/document/d/19nUmtO3kQe6uXclO-xZjYuE_7Mz4Te7U/view?usp=sharing",
+    href: "https://docs.google.com/document/d/1ENKuMIIA1HyTDJHCnG4mq206ToJYElJZ/edit?usp=drive_link&ouid=104819613392939956914&rtpof=true&sd=true",
     date: "09-27",
   },
   {

@@ -13,7 +13,7 @@ export const recentUpdates: UpdateItem[] = [
     date: "09-27",
     type: "筆記",
     title: "AI文章隨想上線",
-    href: "https://docs.google.com/document/d/19nUmtO3kQe6uXclO-xZjYuE_7Mz4Te7U/view?usp=sharing",
+    href: "https://docs.google.com/document/d/1ENKuMIIA1HyTDJHCnG4mq206ToJYElJZ/edit?usp=drive_link&ouid=104819613392939956914&rtpof=true&sd=true",
   },
   {
     date: "09-27",
