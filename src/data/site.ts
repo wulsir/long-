@@ -192,6 +192,12 @@ export const rhythm = [
 ];
 
 export const updates: { date: string; type: string; title: string; href?: string }[] = [
+  {
+    date: "10-19",
+    type: "更新",
+    title: "加入物理實驗動畫：密立根油滴、拉塞福散射、湯姆森射線管",
+    href: "/experiments/Millikan-Oil-Drop.html",
+  },
   { date: "10-10", type: "更新", title: "加上軌道時鐘、今日物理箋與工作室節奏" },
   {
     date: "09-27",

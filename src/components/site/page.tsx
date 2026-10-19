@@ -252,12 +252,17 @@ function SlipCard() {
 
 function Featured() {
   const [openNote, setOpenNote] = useState(false);
+<<<<<<< HEAD
+=======
+  const piece = physicsPieces[0];
+>>>>>>> 12d5c69773d78f91034fc4a8581306d5dad6a904
 
   return (
     <section className="rounded-3xl bg-card p-5 shadow-card">
       <p className="text-xs font-medium tracking-wide text-subtle">正在合作</p>
       <h2 className="mt-2 font-display text-2xl text-ink">物理與 AI</h2>
       <p className="mt-2 text-sm leading-relaxed text-muted">
+<<<<<<< HEAD
         教學影片已經上線，油滴、拉塞福散射、湯姆森射線管三支實驗動畫也可以直接玩。
       </p>
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -271,11 +276,26 @@ function Featured() {
               "flex min-h-12 items-center justify-between gap-3 rounded-2xl px-4 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
               index === 0 ? "bg-ink text-paper" : "bg-wash text-ink",
             )}
+=======
+        教學影片已經上線。實驗動畫還在後製，先從一堂課看起。
+      </p>
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        {piece ? (
+          <a
+            href={piece.href}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="flex min-h-12 items-center justify-between gap-3 rounded-2xl bg-ink px-4 text-sm font-medium text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+>>>>>>> 12d5c69773d78f91034fc4a8581306d5dad6a904
           >
             {piece.label}
             <ArrowUpRight className="size-4" strokeWidth={1.75} />
           </a>
+<<<<<<< HEAD
         ))}
+=======
+        ) : null}
+>>>>>>> 12d5c69773d78f91034fc4a8581306d5dad6a904
         <button
           type="button"
           aria-expanded={openNote}
