@@ -11,7 +11,8 @@ export type LinkIconId =
 
 export type SubLink = {
   label: string;
-  href: string;
+  href?: string;
+  children?: SubLink[];
 };
 
 export type FeaturedLink = {
@@ -39,7 +40,7 @@ export const profile = {
   availability: "物理與AI合作",
   avatar: "/avatar.jpg",
   video: "/intro.mp4",
-  email: "wul@go.pymsh.tyc.edu.tw",
+  email: "wul@go.ymhs.tyc.edu.tw",
 } as const;
 
 export const featuredLinks: FeaturedLink[] = [
@@ -59,12 +60,17 @@ export const featuredLinks: FeaturedLink[] = [
   {
     title: "AI寫作筆記",
     subtitle: "關於AI文章隨想與影片及遊戲製作",
-    href: "https://physicslong.studio/notes",
+    href: "#",
     icon: "book",
+    subLinks: [
+      { label: "AI文章隨想", href: "https://docs.google.com/document/d/1ENKuMIIA1HyTDJHCnG4mq206ToJYElJZ/edit?usp=drive_link&ouid=104819613392939956914&rtpof=true&sd=true" },
+      { label: "影片製作", href: "#" },
+      { label: "遊戲製作", href: "#" },
+    ],
   },
   {
     title: "免費AI資源",
-    subtitle: "好用的5大AI",
+    subtitle: "5大好用AI和2個agent AI",
     href: "https://grok.com/",
     icon: "shop",
     subLinks: [
@@ -73,6 +79,16 @@ export const featuredLinks: FeaturedLink[] = [
       { label: "Grok", href: "https://grok.com/" },
       { label: "Meta AI", href: "https://www.meta.ai/" },
       { label: "Gemini", href: "https://gemini.google.com/" },
+      {
+        label: "工作流AI",
+        children: [
+          {
+            label: "Hermas agent",
+            href: "https://hermes-agent.nousresearch.com/",
+          },
+          { label: "Manus", href: "https://manus.im/" },
+        ],
+      },
     ],
   },
   {
@@ -80,6 +96,18 @@ export const featuredLinks: FeaturedLink[] = [
     subtitle: "品牌、AI與設計案件",
     href: `mailto:${profile.email}`,
     icon: "mail",
+  },
+  {
+    title: "物理與AI合作",
+    subtitle: "物理AI教學影片 · 物理AI實驗動畫",
+    href: "#physics-ai",
+    icon: "brain",
+    subLinks: [
+      { label: "物理AI教學影片", href: "https://youtu.be/TmxfccWpFWo?si=-bvrT1cRg63NRD0K" },
+      { label: "實驗動畫", href: "/experiments/Millikan-Oil-Drop.html" },
+      { label: "拉塞福散射", href: "/experiments/rutherford_scattering.html" },
+      { label: "湯姆射線管", href: "/experiments/thomson_crt.html" },
+    ],
   },
 ];
 

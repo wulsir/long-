@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>拉塞福 α 粒子散射實驗</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#0c0806;
+    --bg-1:#171009;
+    --bg-2:#1f150c;
+    --panel: rgba(28,19,11,0.68);
+    --panel-border: rgba(212,175,55,0.22);
+    --panel-border-strong: rgba(212,175,55,0.42);
+    --gold:#d4af37;
+    --gold-bright:#f5da7a;
+    --gold-dim:#7a5f22;
+    --alpha:#ff7a59;
+    --alpha-bright:#ffb59a;
+    --scint:#9dffb0;
+    --scint-bright:#d8ffe0;
+    --text:#f4ecdd;
+    --text-dim:#bfae8f;
+    --text-faint:#7c6c50;
+    --display: 'Space Grotesk', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(212,175,55,0.14), transparent 55%),
+      radial-gradient(ellipse at 90% 100%, rgba(255,122,89,0.08), transparent 50%),
+      var(--bg-0);
+    color:var(--text);
+    font-family:var(--display);
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background: rgba(212,175,55,0.3); }
+  .app{ max-width:1180px; margin:0 auto; padding:28px 20px 60px; }
+
+  header{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    gap:24px; flex-wrap:wrap;
+    padding-bottom:18px; border-bottom:1px solid var(--panel-border);
+    margin-bottom:22px;
+  }
+  .title-block h1{
+    font-size: clamp(22px, 3vw, 30px); font-weight:600;
+    margin:0 0 6px; color:var(--text);
+  }
+  .title-block p{ margin:0; color:var(--text-dim); font-size:14px; max-width:56ch; line-height:1.6; }
+  .year-tag{
+    font-family:var(--mono); font-size:12.5px; color:var(--gold-bright);
+    border:1px solid rgba(212,175,55,0.4); background: rgba(212,175,55,0.08);
+    padding:6px 12px; border-radius:999px; white-space:nowrap;
+  }
+
+  .stage{
+    position:relative; border-radius:18px;
+    background: radial-gradient(circle at 50% 50%, var(--bg-2), var(--bg-1) 70%);
+    border:1px solid var(--panel-border);
+    box-shadow: 0 30px 80px -40px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.03);
+    overflow:hidden; padding:10px;
+  }
+  canvas{ display:block; width:100%; height:460px; border-radius:12px; }
+  @media (max-width:640px){ canvas{ height:340px; } }
+
+  .stat-strip{
+    position:absolute; top:22px; left:22px;
+    display:flex; flex-direction:column; gap:8px; pointer-events:none;
+  }
+  .readout{
+    font-family:var(--mono); font-size:12.5px; color:var(--text-dim);
+    background: rgba(10,7,4,0.55); border:1px solid var(--panel-border);
+    padding:5px 10px; border-radius:8px; backdrop-filter: blur(6px);
+    display:flex; gap:10px; align-items:baseline;
+  }
+  .readout .val{ color:var(--gold-bright); font-weight:600; min-width:5ch; text-align:right; }
+  .readout .val.hot{ color:var(--alpha-bright); }
+  .readout .unit{ color:var(--text-faint); }
+
+  .deck{ margin-top:18px; display:grid; grid-template-columns: 1.15fr 1fr; gap:16px; }
+  @media (max-width:860px){ .deck{ grid-template-columns:1fr; } }
+
+  .panel{
+    background: var(--panel); border:1px solid var(--panel-border);
+    border-radius:16px; padding:18px 20px; backdrop-filter: blur(10px);
+  }
+  .panel h2{
+    font-size:13px; color:var(--text-dim); margin:0 0 14px; font-weight:500;
+    display:flex; align-items:center; gap:8px;
+  }
+  .dot{ width:7px; height:7px; border-radius:50%; display:inline-block; }
+  .dot.gold{ background:var(--gold); box-shadow:0 0 8px var(--gold); }
+  .dot.alpha{ background:var(--alpha); box-shadow:0 0 8px var(--alpha); }
+
+  .row{ display:grid; grid-template-columns:108px 1fr 70px; align-items:center; gap:12px; margin-bottom:14px; }
+  .row label{ font-size:13px; color:var(--text-dim); }
+  .row .num{ font-family:var(--mono); font-size:12.5px; color:var(--gold-bright); text-align:right; }
+
+  input[type=range]{ -webkit-appearance:none; width:100%; height:4px; border-radius:3px; background: rgba(255,255,255,0.14); outline:none; }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:15px; height:15px; border-radius:50%;
+    background: var(--gold-bright); box-shadow:0 0 0 4px rgba(212,175,55,0.18), 0 0 10px rgba(212,175,55,0.7);
+    cursor:pointer; border:none; margin-top:-1px;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:15px; height:15px; border-radius:50%; background: var(--gold-bright); border:none;
+    box-shadow:0 0 0 4px rgba(212,175,55,0.18), 0 0 10px rgba(212,175,55,0.7);
+  }
+  input[type=range]:focus-visible{ outline:2px solid var(--gold); outline-offset:4px; }
+
+  .toggle-row{ display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-top:1px solid rgba(255,255,255,0.06); }
+  .toggle-row:first-of-type{ border-top:none; }
+  .toggle-row .lbl{ display:flex; flex-direction:column; gap:2px; }
+  .toggle-row .lbl span.name{ font-size:13.5px; color:var(--text); }
+  .toggle-row .lbl span.sub{ font-size:11.5px; color:var(--text-faint); }
+
+  .switch{ position:relative; width:42px; height:24px; flex:none; }
+  .switch input{ opacity:0; width:100%; height:100%; position:absolute; margin:0; cursor:pointer; z-index:2; }
+  .switch .track{ position:absolute; inset:0; border-radius:999px; background: rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.12); transition: background .25s ease; }
+  .switch .thumb{ position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#e6dcc2; transition: transform .25s ease, background .25s ease, box-shadow .25s ease; }
+  .switch input:checked ~ .track{ background: rgba(212,175,55,0.28); border-color: rgba(212,175,55,0.5); }
+  .switch input:checked ~ .thumb{ transform: translateX(18px); background: var(--gold-bright); box-shadow:0 0 10px rgba(212,175,55,0.8); }
+  .switch input:focus-visible ~ .track{ outline:2px solid var(--gold); outline-offset:2px; }
+
+  .btnrow{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+  button.action{
+    font-family:var(--display); font-size:13px; font-weight:600; color:var(--text);
+    background: rgba(255,255,255,0.05); border:1px solid var(--panel-border-strong);
+    padding:9px 16px; border-radius:10px; cursor:pointer; transition: all .18s ease;
+  }
+  button.action:hover{ background: rgba(255,255,255,0.09); transform:translateY(-1px); }
+  button.action.primary{
+    background: linear-gradient(180deg, rgba(212,175,55,0.24), rgba(212,175,55,0.08));
+    border-color: rgba(212,175,55,0.5); color: var(--gold-bright);
+  }
+  button.action:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+
+  .formula-box{
+    font-family:var(--mono); font-size:12.5px; line-height:2; color:var(--text-dim);
+    background: rgba(0,0,0,0.25); border:1px dashed rgba(212,175,55,0.28);
+    border-radius:10px; padding:12px 14px; margin-top:6px;
+  }
+  .formula-box b{ color:var(--gold-bright); font-weight:600; }
+
+  .compare{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
+  .compare .card{
+    border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px;
+    background: rgba(255,255,255,0.02); text-align:center;
+  }
+  .compare .card p{ font-size:11.5px; color:var(--text-faint); margin:8px 0 0; line-height:1.5; }
+  .compare .card .tag{ font-size:11px; color:var(--text-dim); font-family:var(--mono); }
+  .compare svg{ width:100%; height:74px; }
+
+  .note{ font-size:12px; color:var(--text-faint); line-height:1.7; margin-top:14px; }
+  footer{ margin-top:22px; font-size:11.5px; color:var(--text-faint); text-align:center; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="title-block">
+      <h1>拉塞福 α 粒子散射實驗</h1>
+      <p>以高速 α 粒子轟擊金箔，觀察散射角度分布 —— 1909–1911 年，Geiger 與 Marsden 的實驗結果，讓 Rutherford 推翻了「葡萄乾布丁模型」，提出原子核模型。</p>
+    </div>
+    <div class="year-tag">1909–1911 · Manchester</div>
+  </header>
+
+  <div class="stage">
+    <canvas id="scene" aria-label="α 粒子散射動畫，顯示粒子穿過金箔後在環形螢光屏上的散射位置"></canvas>
+    <div class="stat-strip" id="statStrip">
+      <div class="readout"><span>總粒子數</span><span class="val" id="rTotal">0</span></div>
+      <div class="readout"><span>大角度 (&gt;90°)</span><span class="val hot" id="rBack">0</span></div>
+      <div class="readout"><span>大角度比例</span><span class="val hot" id="rPct">0.00%</span></div>
+    </div>
+  </div>
+
+  <div class="deck">
+    <div class="panel">
+      <h2><span class="dot alpha"></span>粒子束控制</h2>
+
+      <div class="row">
+        <label for="energy">α 粒子動能</label>
+        <input type="range" id="energy" min="3" max="9" step="0.1" value="5">
+        <span class="num" id="energyNum">5.0 MeV</span>
+      </div>
+
+      <div class="row">
+        <label for="rate">發射速率</label>
+        <input type="range" id="rate" min="1" max="12" step="1" value="6">
+        <span class="num" id="rateNum">6 /s</span>
+      </div>
+
+      <div class="toggle-row">
+        <div class="lbl"><span class="name">顯示散射角直方圖</span><span class="sub">環形螢光屏內側的計數長條</span></div>
+        <label class="switch"><input type="checkbox" id="histToggle" checked><span class="track"></span><span class="thumb"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div class="lbl"><span class="name">強調大角度事件</span><span class="sub">大角度散射時畫面閃光提示</span></div>
+        <label class="switch"><input type="checkbox" id="highlightToggle" checked><span class="track"></span><span class="thumb"></span></label>
+      </div>
+
+      <div class="btnrow">
+        <button class="action primary" id="playPause">暫停</button>
+        <button class="action" id="resetBtn">重設統計</button>
+      </div>
+
+      <p class="note">
+        每個粒子依隨機的「瞄準距離」(impact parameter, b) 通過金箔：多數粒子 b 較大，幾乎直線通過；
+        只有極少數 b 非常小、恰好朝向原子核而發生大角度偏轉，甚至被彈回 —— 這正是 Rutherford 當年最驚訝的觀察。
+      </p>
+    </div>
+
+    <div class="panel">
+      <h2>原理與模型比較</h2>
+      <div class="formula-box">
+散射角 θ 與瞄準距離 b 的關係（庫侖散射）：<br>
+<b>tan(θ/2) ∝ 1 / (E<sub>k</sub> · b)</b><br>
+b 越小 → θ 越大；E<sub>k</sub> 越大 → 偏轉越小
+      </div>
+
+      <div class="compare">
+        <div class="card">
+          <span class="tag">湯姆森模型（預測）</span>
+          <svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="35" r="26" fill="rgba(212,175,55,0.10)" stroke="rgba(212,175,55,0.4)" stroke-width="1.5"/>
+            <line x1="4" y1="30" x2="112" y2="32" stroke="#ff9a7c" stroke-width="1.6"/>
+            <line x1="4" y1="40" x2="112" y2="38" stroke="#ff9a7c" stroke-width="1.6"/>
+            <line x1="4" y1="50" x2="112" y2="44" stroke="#ff9a7c" stroke-width="1.2" opacity="0.7"/>
+          </svg>
+          <p>正電荷均勻分布，幾乎所有 α 粒子都只受到微小偏轉，不可能有大角度散射。</p>
+        </div>
+        <div class="card">
+          <span class="tag">拉塞福模型（實測）</span>
+          <svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="35" r="4.5" fill="#f5da7a"/>
+            <line x1="4" y1="30" x2="112" y2="32" stroke="#ff9a7c" stroke-width="1.6"/>
+            <line x1="4" y1="40" x2="112" y2="38" stroke="#ff9a7c" stroke-width="1.6"/>
+            <path d="M4 50 L52 37 L14 10" stroke="#ff9a7c" stroke-width="1.6" fill="none"/>
+          </svg>
+          <p>正電荷集中在極小的原子核，絕大多數粒子仍直線通過，但少數恰好靠近核心的粒子被大角度彈開。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>α 粒子散射互動示意 · 瞄準距離依實際粒子束截面均勻取樣，散射角分布依庫侖散射關係計算</footer>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('scene');
+  const ctx = canvas.getContext('2d');
+  let W,H,DPR,cx,cy,R;
+
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio||1,2);
+    const rect = canvas.getBoundingClientRect();
+    W = rect.width; H = rect.height;
+    canvas.width = W*DPR; canvas.height = H*DPR;
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    cx = W*0.56; cy = H*0.52;
+    R = Math.min(W*0.42, H*0.42);
+  }
+  window.addEventListener('resize', resize);
+
+  const energyEl = document.getElementById('energy');
+  const rateEl = document.getElementById('rate');
+  const histToggle = document.getElementById('histToggle');
+  const highlightToggle = document.getElementById('highlightToggle');
+  const playPauseBtn = document.getElementById('playPause');
+  const resetBtn = document.getElementById('resetBtn');
+  const energyNum = document.getElementById('energyNum');
+  const rateNum = document.getElementById('rateNum');
+  const rTotal = document.getElementById('rTotal');
+  const rBack = document.getElementById('rBack');
+  const rPct = document.getElementById('rPct');
+
+  function syncLabels(){
+    energyNum.textContent = parseFloat(energyEl.value).toFixed(1)+' MeV';
+    rateNum.textContent = Math.round(rateEl.value)+' /s';
+  }
+  [energyEl, rateEl].forEach(el=>el.addEventListener('input', syncLabels));
+  syncLabels();
+
+  let playing = true;
+  playPauseBtn.addEventListener('click', ()=>{
+    playing = !playing;
+    playPauseBtn.textContent = playing ? '暫停' : '播放';
+  });
+  resetBtn.addEventListener('click', ()=>{
+    particles.length = 0; flashes.length = 0;
+    bins.fill(0);
+    totalCount = 0; backCount = 0;
+    updateStats();
+  });
+
+  const K0 = 9;       // scattering-strength constant (illustrative)
+  const BMAX = 70;    // px, beam half-width / max impact parameter
+  const NBINS = 24;   // histogram bins over 0..180 deg
+  let bins = new Array(NBINS).fill(0);
+  let totalCount = 0, backCount = 0;
+
+  function updateStats(){
+    rTotal.textContent = totalCount;
+    rBack.textContent = backCount;
+    rPct.textContent = (totalCount ? (backCount/totalCount*100) : 0).toFixed(2)+'%';
+  }
+
+  let particles = [];
+  let flashes = [];
+  let flashCam = 0; // screen-shake style highlight pulse
+  let spawnAcc = 0;
+  let time = 0;
+
+  function spawnParticle(){
+    const sign = Math.random() < 0.5 ? -1 : 1;
+    const b = sign * BMAX * Math.sqrt(Math.random());
+    particles.push({
+      x: cx - R,
+      y: cy + b,
+      vx: 1, vy: 0,
+      b: b,
+      phase: 'in'
+    });
+  }
+
+  function step(dt){
+    time += dt;
+    const E = parseFloat(energyEl.value);
+    const rate = parseFloat(rateEl.value);
+    spawnAcc += dt;
+    const interval = 1/Math.max(rate,0.5);
+    while (spawnAcc > interval){ spawnParticle(); spawnAcc -= interval; }
+
+    const speed = 130 * dt;
+
+    for (let i = particles.length-1; i>=0; i--){
+      const p = particles[i];
+      p.x += p.vx*speed;
+      p.y += p.vy*speed;
+
+      if (p.phase === 'in' && p.x >= cx){
+        const bmag = Math.max(Math.abs(p.b), 0.4);
+        let theta = 2*Math.atan(K0/(E*bmag));
+        theta = Math.min(theta, Math.PI*0.978);
+        const dir = p.b >= 0 ? 1 : -1;
+        const ang = theta*dir;
+        p.vx = Math.cos(ang);
+        p.vy = Math.sin(ang);
+        p.theta = theta;
+        p.phase = 'out';
+      }
+
+      if (p.phase === 'out'){
+        const dist = Math.hypot(p.x-cx, p.y-cy);
+        if (dist >= R){
+          const hitAngle = Math.atan2(p.y-cy, p.x-cx);
+          const scatterDeg = (p.theta||0) * 180/Math.PI;
+          const binIdx = Math.min(NBINS-1, Math.floor(scatterDeg/180*NBINS));
+          bins[binIdx]++;
+          totalCount++;
+          const isBig = scatterDeg > 90;
+          if (isBig){ backCount++; if (highlightToggle.checked) flashCam = 1.0; }
+          flashes.push({
+            x: cx+Math.cos(hitAngle)*R, y: cy+Math.sin(hitAngle)*R,
+            life: 1.0, big: isBig
+          });
+          updateStats();
+          particles.splice(i,1);
+          continue;
+        }
+      }
+    }
+
+    for (let i=flashes.length-1;i>=0;i--){
+      flashes[i].life -= dt*(flashes[i].big ? 0.28 : 0.6);
+      if (flashes[i].life <= 0) flashes.splice(i,1);
+    }
+    if (flashCam > 0) flashCam = Math.max(0, flashCam - dt*1.2);
+  }
+
+  function drawScene(){
+    ctx.clearRect(0,0,W,H);
+
+    const bg = ctx.createRadialGradient(cx,cy,10,cx,cy,R*1.3);
+    bg.addColorStop(0, 'rgba(60,45,20,'+(0.22+flashCam*0.25)+')');
+    bg.addColorStop(1, 'rgba(10,7,4,0)');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0,0,W,H);
+
+    // histogram (drawn just inside the screen circle)
+    if (histToggle.checked){
+      const maxCount = Math.max(1, ...bins);
+      for (let i=0;i<NBINS;i++){
+        const a0 = (i/NBINS)*Math.PI;
+        const a1 = ((i+1)/NBINS)*Math.PI;
+        const amid = (a0+a1)/2;
+        const h = Math.log(bins[i]+1)/Math.log(maxCount+1) * (R*0.32);
+        if (h <= 0) continue;
+        for (const s of [1,-1]){
+          const ang = amid*s;
+          const rx0 = R-2, rx1 = R-2-h;
+          ctx.strokeStyle = bins[i] > 0 && (i/NBINS*180) > 90 ? 'rgba(255,122,89,0.55)' : 'rgba(212,175,55,0.35)';
+          ctx.lineWidth = (Math.PI/NBINS)*R*0.82;
+          ctx.beginPath();
+          ctx.moveTo(cx+Math.cos(ang)*rx0, cy+Math.sin(ang)*rx0);
+          ctx.lineTo(cx+Math.cos(ang)*rx1, cy+Math.sin(ang)*rx1);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // screen circle (scintillation screen)
+    ctx.save();
+    ctx.strokeStyle = 'rgba(157,255,176,0.28)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx,cy,R,0,Math.PI*2);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(157,255,176,0.08)';
+    ctx.lineWidth = 10;
+    ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = 'rgba(200,215,230,0.55)';
+    ctx.font = '11px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('環形螢光屏 (ZnS)', cx, cy-R-14);
+
+    // source housing (left, at angle 180)
+    const srcX = cx-R, srcY = cy;
+    ctx.save();
+    ctx.fillStyle = 'rgba(120,90,50,0.9)';
+    ctx.fillRect(srcX-26, srcY-10, 22, 20);
+    ctx.strokeStyle = 'rgba(212,175,55,0.6)';
+    ctx.lineWidth = 1.2;
+    ctx.strokeRect(srcX-26, srcY-10, 22, 20);
+    ctx.restore();
+    ctx.fillText('α 放射源', srcX-15, srcY+30);
+    ctx.fillText('(鉛盒準直)', srcX-15, srcY+43);
+
+    // beam guide lines (faint)
+    ctx.strokeStyle = 'rgba(255,122,89,0.10)';
+    ctx.lineWidth = 1;
+    for (let k=-3;k<=3;k++){
+      ctx.beginPath();
+      ctx.moveTo(srcX, cy + k*BMAX/3);
+      ctx.lineTo(cx, cy + k*BMAX/3);
+      ctx.stroke();
+    }
+
+    // gold foil at center with a few nucleus dots
+    ctx.save();
+    ctx.shadowColor = 'rgba(212,175,55,0.7)';
+    ctx.shadowBlur = 12;
+    const foilGrad = ctx.createLinearGradient(cx-3,0,cx+3,0);
+    foilGrad.addColorStop(0,'rgba(212,175,55,0.15)');
+    foilGrad.addColorStop(0.5,'rgba(245,218,122,0.85)');
+    foilGrad.addColorStop(1,'rgba(212,175,55,0.15)');
+    ctx.fillStyle = foilGrad;
+    ctx.fillRect(cx-2.5, cy-BMAX-14, 5, (BMAX+14)*2);
+    ctx.restore();
+    ctx.fillStyle = 'rgba(255,235,180,0.9)';
+    for (let n=0;n<7;n++){
+      const ny = cy + (n-3)* (BMAX*0.55);
+      ctx.beginPath();
+      ctx.arc(cx, ny, 1.6, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(200,215,230,0.6)';
+    ctx.fillText('金箔 (~4×10⁻⁷ m)', cx, cy+BMAX+34);
+
+    // flashes on screen
+    for (const f of flashes){
+      ctx.save();
+      const glowSize = f.big ? 22 : 10;
+      ctx.shadowColor = f.big ? 'rgba(255,180,150,0.95)' : 'rgba(157,255,176,0.9)';
+      ctx.shadowBlur = glowSize * f.life;
+      ctx.fillStyle = f.big ? `rgba(255,190,160,${f.life})` : `rgba(200,255,220,${f.life})`;
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.big ? 4.2 : 2.6, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // particles
+    for (const p of particles){
+      ctx.save();
+      ctx.shadowColor = 'rgba(255,140,110,0.9)';
+      ctx.shadowBlur = 9;
+      ctx.fillStyle = 'rgba(255,180,150,0.95)';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 2.1, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // subtle vignette flash overlay on big event
+    if (flashCam > 0){
+      ctx.fillStyle = `rgba(255,150,110,${flashCam*0.10})`;
+      ctx.fillRect(0,0,W,H);
+    }
+  }
+
+  let lastT = performance.now();
+  function loop(t){
+    const dt = Math.min((t-lastT)/1000, 0.05);
+    lastT = t;
+    if (playing) step(dt);
+    drawScene();
+    requestAnimationFrame(loop);
+  }
+
+  resize();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

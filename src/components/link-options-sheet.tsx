@@ -1,7 +1,14 @@
-import { useEffect } from "react";
-import { ArrowUpRight, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowUpRight, ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { SubLink } from "@/lib/profile";
 import { cn } from "@/lib/utils";
+
+const itemClassName = cn(
+  "group flex min-h-12 w-full items-center gap-3 rounded-2xl bg-icon px-4 py-3",
+  "transition-[transform,background-color] duration-[var(--motion-quick)] ease-[var(--ease-out)]",
+  "hover:-translate-y-0.5 active:scale-[0.97]",
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+);
 
 export function LinkOptionsSheet({
   open,
@@ -14,19 +21,28 @@ export function LinkOptionsSheet({
   title: string;
   links: SubLink[];
 }) {
+  const [group, setGroup] = useState<SubLink | null>(null);
+  const items = group?.children ?? links;
+  const heading = group?.label ?? title;
+
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setGroup(null);
+      return;
+    }
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key !== "Escape") return;
+      if (group) setGroup(null);
+      else onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = prev;
       window.removeEventListener("keydown", onKey);
     };
-  }, [open, onClose]);
+  }, [open, onClose, group]);
 
   if (!open) return null;
 
@@ -41,15 +57,35 @@ export function LinkOptionsSheet({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={title}
+        aria-label={heading}
         className={cn(
           "relative z-10 w-full max-w-md rounded-t-3xl bg-card p-5 shadow-card-hover",
           "sm:max-w-sm sm:rounded-3xl",
           "pb-[calc(env(safe-area-inset-bottom)+1.25rem)]",
         )}
       >
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-medium text-foreground">{title}</h2>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-1">
+            {group ? (
+              <button
+                type="button"
+                onClick={() => setGroup(null)}
+                aria-label="返回"
+                className={cn(
+                  "flex size-9 shrink-0 items-center justify-center rounded-full",
+                  "bg-icon text-foreground",
+                  "transition-[transform,box-shadow] duration-[var(--motion-quick)] ease-[var(--ease-out)]",
+                  "hover:shadow-card active:scale-[0.96]",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                )}
+              >
+                <ChevronLeft className="size-4" strokeWidth={1.75} />
+              </button>
+            ) : null}
+            <h2 className="truncate text-base font-medium text-foreground">
+              {heading}
+            </h2>
+          </div>
           <button
             type="button"
             onClick={onClose}
@@ -67,28 +103,45 @@ export function LinkOptionsSheet({
         </div>
 
         <div className="flex flex-col gap-2">
-          {links.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              target="_blank"
-              rel="noreferrer noopener"
-              className={cn(
-                "group flex min-h-12 items-center gap-3 rounded-2xl bg-icon px-4 py-3",
-                "transition-[transform,background-color] duration-[var(--motion-quick)] ease-[var(--ease-out)]",
-                "hover:-translate-y-0.5 active:scale-[0.97]",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              )}
-            >
-              <span className="flex-1 text-left font-medium text-foreground">
-                {item.label}
-              </span>
-              <ArrowUpRight
-                className="size-4 shrink-0 text-subtle transition-transform duration-[var(--motion-quick)] ease-[var(--ease-out)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground"
-                strokeWidth={1.75}
-              />
-            </a>
-          ))}
+          {items.map((item) => {
+            const nested = Boolean(item.children && item.children.length > 0);
+            if (nested) {
+              return (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => setGroup(item)}
+                  className={itemClassName}
+                >
+                  <span className="flex-1 text-left font-medium text-foreground">
+                    {item.label}
+                  </span>
+                  <ChevronRight
+                    className="size-4 shrink-0 text-subtle transition-transform duration-[var(--motion-quick)] ease-[var(--ease-out)] group-hover:translate-x-0.5 group-hover:text-foreground"
+                    strokeWidth={1.75}
+                  />
+                </button>
+              );
+            }
+
+            return (
+              <a
+                key={item.label}
+                href={item.href}
+                target="_blank"
+                rel="noreferrer noopener"
+                className={itemClassName}
+              >
+                <span className="flex-1 text-left font-medium text-foreground">
+                  {item.label}
+                </span>
+                <ArrowUpRight
+                  className="size-4 shrink-0 text-subtle transition-transform duration-[var(--motion-quick)] ease-[var(--ease-out)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground"
+                  strokeWidth={1.75}
+                />
+              </a>
+            );
+          })}
         </div>
       </div>
     </div>
