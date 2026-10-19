@@ -109,6 +109,21 @@ export const physicsPieces = [
     href: "https://youtu.be/TmxfccWpFWo?si=-bvrT1cRg63NRD0K",
     note: "一堂已經上線的物理 AI 課。",
   },
+  {
+    label: "實驗動畫",
+    href: "/experiments/Millikan-Oil-Drop.html",
+    note: "油滴實驗互動模擬。",
+  },
+  {
+    label: "拉塞福散射",
+    href: "/experiments/rutherford_scattering.html",
+    note: "α 粒子散射動畫。",
+  },
+  {
+    label: "湯姆射線管",
+    href: "/experiments/thomson_crt.html",
+    note: "陰極射線管動畫。",
+  },
 ];
 
 export const experimentNote =

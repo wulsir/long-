@@ -104,7 +104,9 @@ export const featuredLinks: FeaturedLink[] = [
     icon: "brain",
     subLinks: [
       { label: "物理AI教學影片", href: "https://youtu.be/TmxfccWpFWo?si=-bvrT1cRg63NRD0K" },
-      { label: "物理AI實驗動畫", href: "#experiment" },
+      { label: "實驗動畫", href: "/experiments/Millikan-Oil-Drop.html" },
+      { label: "拉塞福散射", href: "/experiments/rutherford_scattering.html" },
+      { label: "湯姆射線管", href: "/experiments/thomson_crt.html" },
     ],
   },
 ];

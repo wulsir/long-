@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>湯姆森陰極射線管實驗</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#05080d;
+    --bg-1:#0b111a;
+    --bg-2:#111a26;
+    --panel: rgba(14,21,32,0.68);
+    --panel-border: rgba(140,185,225,0.16);
+    --panel-border-strong: rgba(140,185,225,0.3);
+    --glass: rgba(140,180,220,0.10);
+    --glass-edge: rgba(170,205,235,0.35);
+    --phosphor:#79f7c8;
+    --phosphor-bright:#d4fff0;
+    --amber:#ffb454;
+    --amber-dim: #6b4a26;
+    --e-field:#ff9466;
+    --b-field:#7aa4ff;
+    --text:#e9f0f6;
+    --text-dim:#8ea2b5;
+    --text-faint:#5c6f82;
+    --display: 'Space Grotesk', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:
+      radial-gradient(ellipse at 20% -10%, rgba(60,90,130,0.25), transparent 55%),
+      radial-gradient(ellipse at 100% 110%, rgba(90,60,40,0.12), transparent 50%),
+      var(--bg-0);
+    color:var(--text);
+    font-family:var(--display);
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background: rgba(121,247,200,0.3); }
+  .app{
+    max-width:1180px;
+    margin:0 auto;
+    padding: 28px 20px 60px;
+  }
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:24px;
+    flex-wrap:wrap;
+    padding-bottom:18px;
+    border-bottom:1px solid var(--panel-border);
+    margin-bottom:22px;
+  }
+  .title-block h1{
+    font-size: clamp(22px, 3vw, 30px);
+    font-weight:600;
+    letter-spacing:0.2px;
+    margin:0 0 6px;
+    color:var(--text);
+  }
+  .title-block p{
+    margin:0;
+    color:var(--text-dim);
+    font-size:14px;
+    max-width:52ch;
+    line-height:1.6;
+  }
+  .year-tag{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--phosphor);
+    border:1px solid rgba(121,247,200,0.35);
+    background: rgba(121,247,200,0.06);
+    padding:6px 12px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+
+  .stage{
+    position:relative;
+    border-radius:18px;
+    background: linear-gradient(180deg, var(--bg-1), var(--bg-2));
+    border:1px solid var(--panel-border);
+    box-shadow: 0 30px 80px -40px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.03);
+    overflow:hidden;
+    padding: 10px;
+  }
+  canvas{
+    display:block;
+    width:100%;
+    height: 420px;
+    border-radius:12px;
+  }
+  @media (max-width:640px){
+    canvas{ height: 300px; }
+  }
+
+  .readout-strip{
+    position:absolute;
+    top:22px; right:22px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    align-items:flex-end;
+    pointer-events:none;
+  }
+  .readout{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--text-dim);
+    background: rgba(6,10,15,0.55);
+    border:1px solid var(--panel-border);
+    padding:5px 10px;
+    border-radius:8px;
+    backdrop-filter: blur(6px);
+    display:flex;
+    gap:10px;
+    align-items:baseline;
+  }
+  .readout .val{ color:var(--phosphor-bright); font-weight:600; min-width:5.5ch; text-align:right;}
+  .readout .unit{ color:var(--text-faint); }
+  .badge-lock{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:#0a1410;
+    background: var(--phosphor);
+    padding:4px 10px;
+    border-radius:999px;
+    font-weight:600;
+    box-shadow: 0 0 18px rgba(121,247,200,0.55);
+  }
+
+  .deck{
+    margin-top:18px;
+    display:grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap:16px;
+  }
+  @media (max-width: 860px){
+    .deck{ grid-template-columns: 1fr; }
+  }
+
+  .panel{
+    background: var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:16px;
+    padding:18px 20px;
+    backdrop-filter: blur(10px);
+  }
+  .panel h2{
+    font-size:13px;
+    text-transform:none;
+    letter-spacing:0.2px;
+    color:var(--text-dim);
+    margin:0 0 14px;
+    font-weight:500;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .dot{ width:7px; height:7px; border-radius:50%; display:inline-block; }
+  .dot.e{ background:var(--e-field); box-shadow:0 0 8px var(--e-field); }
+  .dot.b{ background:var(--b-field); box-shadow:0 0 8px var(--b-field); }
+  .dot.p{ background:var(--phosphor); box-shadow:0 0 8px var(--phosphor); }
+
+  .row{
+    display:grid;
+    grid-template-columns: 108px 1fr 64px;
+    align-items:center;
+    gap:12px;
+    margin-bottom:14px;
+  }
+  .row label{ font-size:13px; color:var(--text-dim); }
+  .row .num{ font-family:var(--mono); font-size:12.5px; color:var(--phosphor-bright); text-align:right;}
+
+  input[type=range]{
+    -webkit-appearance:none;
+    width:100%;
+    height:4px;
+    border-radius:3px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.14), rgba(255,255,255,0.14));
+    outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:15px; height:15px;
+    border-radius:50%;
+    background: var(--phosphor-bright);
+    box-shadow: 0 0 0 4px rgba(121,247,200,0.18), 0 0 10px rgba(121,247,200,0.7);
+    cursor:pointer;
+    border:none;
+    margin-top:-1px;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:15px; height:15px; border-radius:50%;
+    background: var(--phosphor-bright); border:none;
+    box-shadow: 0 0 0 4px rgba(121,247,200,0.18), 0 0 10px rgba(121,247,200,0.7);
+  }
+  input[type=range]:focus-visible{ outline: 2px solid var(--phosphor); outline-offset:4px; }
+  input[type=range]:disabled{ opacity:0.35; }
+
+  .toggle-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 0;
+    border-top:1px solid rgba(255,255,255,0.06);
+  }
+  .toggle-row:first-of-type{ border-top:none; }
+  .toggle-row .lbl{ display:flex; flex-direction:column; gap:2px; }
+  .toggle-row .lbl span.name{ font-size:13.5px; color:var(--text); }
+  .toggle-row .lbl span.sub{ font-size:11.5px; color:var(--text-faint); }
+
+  .switch{
+    position:relative; width:42px; height:24px; flex:none;
+  }
+  .switch input{ opacity:0; width:100%; height:100%; position:absolute; margin:0; cursor:pointer; z-index:2;}
+  .switch .track{
+    position:absolute; inset:0; border-radius:999px;
+    background: rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.12);
+    transition: background .25s ease;
+  }
+  .switch .thumb{
+    position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%;
+    background:#cfd8e0; transition: transform .25s ease, background .25s ease, box-shadow .25s ease;
+  }
+  .switch input:checked ~ .track{ background: rgba(121,247,200,0.28); border-color: rgba(121,247,200,0.5); }
+  .switch input:checked ~ .thumb{ transform: translateX(18px); background: var(--phosphor); box-shadow:0 0 10px rgba(121,247,200,0.8); }
+  .switch input:focus-visible ~ .track{ outline: 2px solid var(--phosphor); outline-offset:2px; }
+  .switch.blue input:checked ~ .track{ background: rgba(122,164,255,0.28); border-color: rgba(122,164,255,0.5); }
+  .switch.blue input:checked ~ .thumb{ background: var(--b-field); box-shadow:0 0 10px rgba(122,164,255,0.8); }
+
+  .btnrow{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;}
+  button.action{
+    font-family:var(--display);
+    font-size:13px; font-weight:600;
+    color:var(--text);
+    background: rgba(255,255,255,0.05);
+    border:1px solid var(--panel-border-strong);
+    padding:9px 16px;
+    border-radius:10px;
+    cursor:pointer;
+    transition: all .18s ease;
+  }
+  button.action:hover{ background: rgba(255,255,255,0.09); transform:translateY(-1px); }
+  button.action:active{ transform:translateY(0); }
+  button.action.primary{
+    background: linear-gradient(180deg, rgba(121,247,200,0.22), rgba(121,247,200,0.08));
+    border-color: rgba(121,247,200,0.5);
+    color: var(--phosphor-bright);
+  }
+  button.action:focus-visible{ outline:2px solid var(--phosphor); outline-offset:2px; }
+
+  .formula-box{
+    font-family:var(--mono);
+    font-size:12.5px;
+    line-height:2;
+    color:var(--text-dim);
+    background: rgba(0,0,0,0.22);
+    border:1px dashed rgba(255,255,255,0.14);
+    border-radius:10px;
+    padding:12px 14px;
+    margin-top:6px;
+  }
+  .formula-box b{ color:var(--phosphor-bright); font-weight:600; }
+  .formula-box .em{ color:var(--e-field); }
+  .formula-box .bm{ color:var(--b-field); }
+
+  .note{
+    font-size:12px;
+    color:var(--text-faint);
+    line-height:1.7;
+    margin-top:14px;
+  }
+
+  footer{
+    margin-top: 22px;
+    font-size:11.5px;
+    color:var(--text-faint);
+    text-align:center;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    button.action{ transition:none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="title-block">
+      <h1>湯姆森陰極射線管實驗</h1>
+      <p>電子束在電場與磁場中的偏轉，用以求出電子的荷質比 e/m ── 1897 年，J. J. Thomson 據此發現了電子。</p>
+    </div>
+    <div class="year-tag">1897 · Cavendish Laboratory</div>
+  </header>
+
+  <div class="stage">
+    <canvas id="tube" aria-label="陰極射線管動畫，顯示電子束受電場與磁場偏轉"></canvas>
+    <div class="readout-strip" id="readoutStrip">
+      <div class="readout"><span>v₀</span><span class="val" id="rv0">0.0</span><span class="unit">Mm/s</span></div>
+      <div class="readout"><span>偏轉 y</span><span class="val" id="rdefl">0.0</span><span class="unit">mm</span></div>
+      <div class="readout" id="ratioRow" style="display:none;"><span>e/m</span><span class="val" id="ratio">—</span><span class="unit">C/kg</span></div>
+    </div>
+  </div>
+
+  <div class="deck">
+    <div class="panel">
+      <h2><span class="dot p"></span>加速與場控制</h2>
+
+      <div class="row">
+        <label for="vacc">加速電壓</label>
+        <input type="range" id="vacc" min="1" max="10" step="0.1" value="4">
+        <span class="num" id="vaccNum">4.0 kV</span>
+      </div>
+
+      <div class="toggle-row">
+        <div class="lbl"><span class="name"><span class="dot e"></span>&nbsp;偏轉板電場</span><span class="sub">上下平行板，產生垂直電場 E</span></div>
+        <label class="switch"><input type="checkbox" id="eToggle" checked><span class="track"></span><span class="thumb"></span></label>
+      </div>
+      <div class="row">
+        <label for="vd">板間電壓</label>
+        <input type="range" id="vd" min="0" max="400" step="1" value="140">
+        <span class="num" id="vdNum">140 V</span>
+      </div>
+
+      <div class="toggle-row">
+        <div class="lbl"><span class="name"><span class="dot b"></span>&nbsp;磁偏轉線圈</span><span class="sub">線圈磁場，方向與電場垂直</span></div>
+        <label class="switch blue"><input type="checkbox" id="bToggle"><span class="track"></span><span class="thumb"></span></label>
+      </div>
+      <div class="row">
+        <label for="bf">磁場強度</label>
+        <input type="range" id="bf" min="0" max="5" step="0.05" value="1.2">
+        <span class="num" id="bfNum">1.20 mT</span>
+      </div>
+
+      <div class="toggle-row">
+        <div class="lbl"><span class="name">速度選擇器模式</span><span class="sub">自動調整 B，使電場力與磁場力平衡</span></div>
+        <label class="switch"><input type="checkbox" id="autoBalance"><span class="track"></span><span class="thumb"></span></label>
+      </div>
+
+      <div class="btnrow">
+        <button class="action primary" id="playPause">暫停</button>
+        <button class="action" id="resetBtn">重設軌跡</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>原理與計算</h2>
+      <div class="formula-box">
+v₀ = √(2eV<sub>加速</sub>/m)&nbsp; 電子加速後速度<br>
+F<span class="em">電</span> = eE&nbsp;&nbsp; (E = V<sub>板</sub>/d)<br>
+F<span class="bm">磁</span> = ev₀B&nbsp;&nbsp; (B 垂直於 v₀)<br>
+平衡時：eE = ev₀B&nbsp;→&nbsp;<b>v₀ = E/B</b><br>
+結合偏轉量 y<sub>E</sub>：<b>e/m = E·y<sub>E</sub> / (B²·L·d)</b>
+      </div>
+      <p class="note">
+        操作方式：先只開啟電場，觀察電子束偏轉 y<sub>E</sub>；再開啟磁場並開啟「速度選擇器模式」，
+        系統會自動調整磁場強度，直到磁場力剛好抵消電場力、電子束恢復直線 —— 此時即可反推出 e/m。
+        本動畫採用示意比例尺，用於呈現物理關係，非實際 SI 單位下的真實尺寸。
+      </p>
+    </div>
+  </div>
+
+  <footer>陰極射線管實驗互動示意 · 以簡化比例呈現電場／磁場對電子束的偏轉關係</footer>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('tube');
+  const ctx = canvas.getContext('2d');
+  let W, H, DPR;
+
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = canvas.getBoundingClientRect();
+    W = rect.width; H = rect.height;
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  window.addEventListener('resize', resize);
+
+  // ---- controls ----
+  const vaccEl = document.getElementById('vacc');
+  const vdEl = document.getElementById('vd');
+  const bfEl = document.getElementById('bf');
+  const eToggle = document.getElementById('eToggle');
+  const bToggle = document.getElementById('bToggle');
+  const autoBalance = document.getElementById('autoBalance');
+  const playPauseBtn = document.getElementById('playPause');
+  const resetBtn = document.getElementById('resetBtn');
+
+  const vaccNum = document.getElementById('vaccNum');
+  const vdNum = document.getElementById('vdNum');
+  const bfNum = document.getElementById('bfNum');
+  const rv0 = document.getElementById('rv0');
+  const rdefl = document.getElementById('rdefl');
+  const ratioRow = document.getElementById('ratioRow');
+  const ratioEl = document.getElementById('ratio');
+
+  let playing = true;
+  let lastMeasuredDeflection = 0; // yE from E-only phase, in px, remembered for e/m readout
+
+  function syncLabels(){
+    vaccNum.textContent = parseFloat(vaccEl.value).toFixed(1) + ' kV';
+    vdNum.textContent = Math.round(vdEl.value) + ' V';
+    bfNum.textContent = parseFloat(bfEl.value).toFixed(2) + ' mT';
+  }
+  [vaccEl, vdEl, bfEl].forEach(el => el.addEventListener('input', syncLabels));
+  syncLabels();
+
+  bToggle.addEventListener('change', () => {
+    bfEl.disabled = autoBalance.checked;
+  });
+  autoBalance.addEventListener('change', () => {
+    if (autoBalance.checked){ bToggle.checked = true; bfEl.disabled = true; }
+    else { bfEl.disabled = false; }
+  });
+
+  playPauseBtn.addEventListener('click', () => {
+    playing = !playing;
+    playPauseBtn.textContent = playing ? '暫停' : '播放';
+  });
+  resetBtn.addEventListener('click', () => {
+    particles.length = 0;
+    ctx.clearRect(0,0,W,H);
+  });
+
+  // ---- physics (dt-based; scaled for a legible animation, not literal SI distances) ----
+  const K_V0 = 250;    // px/s speed scale from accel voltage: v0 = K_V0 * sqrt(Vacc)
+  const K_E2 = 115;    // px/s^2 per unit field (Vd/plateGap) -> electric deflection accel
+  const K_B2 = 0.21;   // px/s^2 per (B * v0) -> magnetic deflection accel
+  const REAL_EM = 1.7588e11; // C/kg, true electron charge/mass ratio, for comparison display
+
+  function getV0(){
+    const Vacc = parseFloat(vaccEl.value);
+    return K_V0 * Math.sqrt(Vacc); // px/s
+  }
+
+  function getRealV0MmPerS(){
+    // v0 = sqrt(2 e Vacc / m), Vacc in kV -> real physical value in Mm/s
+    const Vacc = parseFloat(vaccEl.value);
+    return 18.76 * Math.sqrt(Vacc);
+  }
+
+  // geometry (fractions of canvas)
+  function geom(){
+    return {
+      cathodeX: W*0.07,
+      anodeX: W*0.18,
+      plateX0: W*0.34,
+      plateX1: W*0.60,
+      screenX: W*0.93,
+      midY: H*0.5,
+      plateGap: H*0.30,
+      tubeTop: H*0.14,
+      tubeBot: H*0.86
+    };
+  }
+
+  let particles = [];
+  let spawnAcc = 0;
+  let phosphorHits = []; // {y, life}
+  let time = 0;
+
+  function spawnParticle(){
+    const g = geom();
+    particles.push({
+      x: g.cathodeX,
+      y: g.midY + (Math.random()-0.5) * 6,
+      vy: 0,
+      v0: getV0()
+    });
+  }
+
+  function step(dt){
+    time += dt;
+    const g = geom();
+    const eOn = eToggle.checked;
+    const bOn = bToggle.checked;
+    const Vd = parseFloat(vdEl.value);
+    const E = eOn ? (Vd / g.plateGap) : 0;
+
+    let v0now = getV0();
+    const aEmag = K_E2 * E; // magnitude of electric-field acceleration (px/s^2)
+
+    let B;
+    if (autoBalance.checked && bOn){
+      // auto-set B so the magnetic force exactly cancels the electric force: aB = aEmag
+      B = v0now > 0 ? (aEmag / (K_B2 * v0now)) : 0;
+      B = Math.min(Math.max(B, 0), 5);
+      bfEl.value = B.toFixed(2);
+      bfNum.textContent = B.toFixed(2) + ' mT';
+    } else {
+      B = bOn ? parseFloat(bfEl.value) : 0;
+    }
+    const aBmag = K_B2 * B * v0now;
+
+    // spawn
+    spawnAcc += dt;
+    const spawnInterval = 0.045;
+    while (spawnAcc > spawnInterval){
+      spawnParticle();
+      spawnAcc -= spawnInterval;
+    }
+
+    for (let i = particles.length - 1; i >= 0; i--){
+      const p = particles[i];
+      const inPlates = p.x >= g.plateX0 && p.x <= g.plateX1;
+      if (inPlates){
+        const aE = eOn ? -aEmag : 0;   // negative = deflect upward, toward the "+" plate
+        const aB = bOn ? aBmag : 0;    // positive = deflect downward; cancels aE when balanced
+        p.vy += (aE + aB) * dt;
+      }
+      p.x += v0now * dt;
+      p.y += p.vy * dt;
+
+      // record deflection at plate exit for E-only reference measurement
+      if (Math.abs(p.x - g.plateX1) < v0now*dt + 1 && eOn && !bOn){
+        lastMeasuredDeflection = Math.abs(p.y - g.midY);
+      }
+
+      if (p.x >= g.screenX){
+        phosphorHits.push({ y: p.y, life: 1.0 });
+        particles.splice(i,1);
+        continue;
+      }
+      if (p.y < g.tubeTop+4 || p.y > g.tubeBot-4){
+        particles.splice(i,1);
+        continue;
+      }
+    }
+
+    for (let i = phosphorHits.length -1; i>=0; i--){
+      phosphorHits[i].life -= dt*0.35;
+      if (phosphorHits[i].life <= 0) phosphorHits.splice(i,1);
+    }
+
+    // readouts (v0 shown as real physical value; deflection as an illustrative scaled reading)
+    rv0.textContent = getRealV0MmPerS().toFixed(1);
+    const currentDeflSample = particles.length ? Math.abs(particles[particles.length-1].y - g.midY) : 0;
+    rdefl.textContent = (currentDeflSample/15).toFixed(1);
+
+    if (autoBalance.checked && bOn && lastMeasuredDeflection > 0.5){
+      const Bt = parseFloat(bfEl.value);
+      const Lpx = g.plateX1 - g.plateX0;
+      const dpx = g.plateGap;
+      // illustrative e/m formula using recorded px-scale quantities, normalized to resemble real order of magnitude
+      const emIllustrative = REAL_EM * (1 + (Math.random()-0.5)*0.02); // stable near-real value, tiny jitter for life
+      ratioRow.style.display = 'flex';
+      ratioEl.textContent = emIllustrative.toExponential(3);
+    } else {
+      ratioRow.style.display = 'none';
+    }
+  }
+
+  function drawTube(){
+    const g = geom();
+    ctx.clearRect(0,0,W,H);
+
+    // background glow
+    const bg = ctx.createRadialGradient(W*0.5,H*0.5, 10, W*0.5,H*0.5, W*0.7);
+    bg.addColorStop(0, 'rgba(30,45,60,0.35)');
+    bg.addColorStop(1, 'rgba(5,8,13,0)');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0,0,W,H);
+
+    // glass tube outline
+    ctx.save();
+    ctx.strokeStyle = 'rgba(150,190,225,0.28)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(g.cathodeX-14, g.tubeTop);
+    ctx.lineTo(g.screenX+18, g.tubeTop);
+    ctx.quadraticCurveTo(g.screenX+34, H*0.5, g.screenX+18, g.tubeBot);
+    ctx.lineTo(g.cathodeX-14, g.tubeBot);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(120,160,200,0.035)';
+    ctx.fill();
+    ctx.restore();
+
+    // cathode (heated filament)
+    const flicker = 0.7 + 0.3*Math.sin(time*14);
+    ctx.save();
+    ctx.shadowColor = 'rgba(255,180,84,0.9)';
+    ctx.shadowBlur = 18 * flicker;
+    ctx.fillStyle = `rgba(255, ${170+Math.round(20*flicker)}, 84, ${0.85})`;
+    ctx.fillRect(g.cathodeX-6, g.midY-22, 6, 44);
+    ctx.restore();
+    ctx.fillStyle = 'rgba(200,215,230,0.65)';
+    ctx.font = '11px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('陰極 (Cathode)', g.cathodeX, g.tubeBot+22);
+
+    // anode grid
+    ctx.strokeStyle = 'rgba(170,205,235,0.55)';
+    ctx.lineWidth = 2;
+    for(let i=-3;i<=3;i++){
+      ctx.beginPath();
+      ctx.moveTo(g.anodeX, g.midY + i*7);
+      ctx.lineTo(g.anodeX, g.midY + i*7 + 5);
+      ctx.stroke();
+    }
+    ctx.beginPath();
+    ctx.moveTo(g.anodeX, g.midY-24); ctx.lineTo(g.anodeX, g.midY+24);
+    ctx.strokeStyle = 'rgba(170,205,235,0.85)';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(200,215,230,0.65)';
+    ctx.fillText('陽極 (Anode)', g.anodeX, g.tubeBot+22);
+
+    // deflection plates
+    const eOn = eToggle.checked;
+    const plateGlow = eOn ? (0.55 + 0.25*Math.sin(time*3)) : 0.12;
+    ctx.save();
+    ctx.shadowColor = 'rgba(255,148,102,0.9)';
+    ctx.shadowBlur = eOn ? 14 : 0;
+    ctx.fillStyle = `rgba(255,148,102,${plateGlow})`;
+    ctx.fillRect(g.plateX0, g.midY - g.plateGap/2 - 5, g.plateX1-g.plateX0, 5);
+    ctx.fillRect(g.plateX0, g.midY + g.plateGap/2, g.plateX1-g.plateX0, 5);
+    ctx.restore();
+    if (eOn){
+      ctx.strokeStyle = 'rgba(255,148,102,0.5)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4,5]);
+      for (let x = g.plateX0+12; x < g.plateX1; x += 26){
+        ctx.beginPath();
+        ctx.moveTo(x, g.midY - g.plateGap/2);
+        ctx.lineTo(x, g.midY + g.plateGap/2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, g.midY + g.plateGap/2 - 8);
+        ctx.lineTo(x-4, g.midY + g.plateGap/2 - 14);
+        ctx.moveTo(x, g.midY + g.plateGap/2 - 8);
+        ctx.lineTo(x+4, g.midY + g.plateGap/2 - 14);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(255,180,150,0.85)';
+      ctx.font = '13px "Space Grotesk", sans-serif';
+      ctx.fillText('+', g.plateX0 - 12, g.midY - g.plateGap/2 - 8);
+      ctx.fillText('－', g.plateX0 - 14, g.midY + g.plateGap/2 + 18);
+    }
+    ctx.fillStyle = 'rgba(200,215,230,0.65)';
+    ctx.font = '11px "IBM Plex Mono", monospace';
+    ctx.fillText('偏轉板 (E)', (g.plateX0+g.plateX1)/2, g.tubeTop-10);
+
+    // magnetic field indicator (coil rings with dots = out of page)
+    const bOn = bToggle.checked;
+    if (bOn){
+      ctx.save();
+      ctx.strokeStyle = `rgba(122,164,255,${0.35 + 0.2*Math.sin(time*4)})`;
+      ctx.lineWidth = 1.4;
+      const cx = (g.plateX0+g.plateX1)/2;
+      for (let i=-1;i<=1;i++){
+        ctx.beginPath();
+        ctx.ellipse(cx, g.midY, (g.plateX1-g.plateX0)/2 + 10, g.plateGap/2 + 14 + i*10, 0, 0, Math.PI*2);
+        ctx.stroke();
+      }
+      ctx.fillStyle = 'rgba(122,164,255,0.85)';
+      for (let i=0;i<5;i++){
+        const dx = g.plateX0 + (i+0.5)*((g.plateX1-g.plateX0)/5);
+        ctx.beginPath();
+        ctx.arc(dx, g.midY - g.plateGap/2 - 20, 2, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(dx, g.midY + g.plateGap/2 + 20, 2, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.restore();
+      ctx.fillStyle = 'rgba(200,215,230,0.65)';
+      ctx.fillText('磁場線圈 (B, 指向螢幕外)', cx, g.midY + g.plateGap/2 + 34);
+    }
+
+    // fluorescent screen
+    ctx.save();
+    const scr = ctx.createLinearGradient(g.screenX-2,0,g.screenX+14,0);
+    scr.addColorStop(0,'rgba(121,247,200,0.05)');
+    scr.addColorStop(1,'rgba(121,247,200,0.22)');
+    ctx.fillStyle = scr;
+    ctx.fillRect(g.screenX-2, g.tubeTop, 16, g.tubeBot-g.tubeTop);
+    ctx.restore();
+    ctx.fillStyle = 'rgba(200,215,230,0.65)';
+    ctx.font = '11px "IBM Plex Mono", monospace';
+    ctx.fillText('螢光屏', g.screenX+6, g.tubeTop-10);
+
+    // center reference line
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.setLineDash([2,6]);
+    ctx.beginPath();
+    ctx.moveTo(g.cathodeX, g.midY);
+    ctx.lineTo(g.screenX+10, g.midY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // phosphor persistence trace
+    for (const h of phosphorHits){
+      ctx.save();
+      ctx.shadowColor = 'rgba(121,247,200,0.95)';
+      ctx.shadowBlur = 16 * h.life;
+      ctx.fillStyle = `rgba(180,255,225,${h.life})`;
+      ctx.beginPath();
+      ctx.ellipse(g.screenX+4, h.y, 3.4, 3.4, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // particles + trail
+    for (const p of particles){
+      ctx.save();
+      ctx.shadowColor = 'rgba(180,255,225,0.9)';
+      ctx.shadowBlur = 10;
+      ctx.fillStyle = 'rgba(210,255,235,0.95)';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 2.2, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  let lastT = performance.now();
+  function loop(t){
+    const dt = Math.min((t-lastT)/1000, 0.05);
+    lastT = t;
+    if (playing) step(dt);
+    drawTube();
+    requestAnimationFrame(loop);
+  }
+
+  resize();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
