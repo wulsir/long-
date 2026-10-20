@@ -28,7 +28,6 @@ import {
   socials,
   taipeiDayNumber,
   taipeiWeekIndex,
-  updates,
   type LinkItem,
 } from "@/data/site";
 import { cn } from "@/lib/cn";
@@ -38,6 +37,7 @@ import { QuizDialog } from "@/components/site/quiz";
 import { PhysicsQuizDialog } from "@/components/site/physics-quiz";
 import { Heatmap } from "@/components/site/heatmap";
 import { ArticlesCard } from "@/components/site/articles";
+import { RecentUpdates } from "@/components/recent-updates";
 
 const iconButton =
   "flex size-11 items-center justify-center rounded-full bg-card text-ink shadow-card transition-[transform,box-shadow,background-color] duration-200 ease-out hover:-translate-y-px hover:bg-card-hover hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus";
@@ -73,7 +73,7 @@ export function HomePage() {
             <Rhythm />
             <Heatmap />
             <ArticlesCard />
-            <Updates />
+            <RecentUpdates />
             <Footer />
           </div>
         </div>
@@ -399,44 +399,6 @@ function Rhythm() {
       <p className="mt-3 min-h-12 text-sm leading-relaxed text-muted">
         {active ? active.line : "點一天，看這間工作室怎麼排。"}
       </p>
-    </section>
-  );
-}
-
-function Updates() {
-  return (
-    <section>
-      <p className="text-xs font-medium tracking-wide text-subtle">最近動態</p>
-      <ul className="mt-3 flex flex-col gap-2">
-        {updates.map((item) => {
-          const inner = (
-            <>
-              <span className="mt-0.5 shrink-0 rounded-full bg-sage-tint px-2.5 py-1 text-xs font-medium text-sage">{item.date}</span>
-              <span className="min-w-0 flex-1">
-                <span className="text-xs text-subtle">{item.type}</span>
-                <span className="mt-0.5 block text-sm leading-snug text-ink">{item.title}</span>
-              </span>
-              {item.href ? <ArrowUpRight className="mt-1 size-4 shrink-0 text-subtle" strokeWidth={1.75} /> : null}
-            </>
-          );
-          return (
-            <li key={`${item.date}-${item.title}`}>
-              {item.href ? (
-                <a
-                  href={item.href}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="flex min-h-12 items-start gap-3 rounded-2xl border border-line bg-card/80 px-4 py-3 transition-colors duration-200 hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
-                >
-                  {inner}
-                </a>
-              ) : (
-                <div className="flex min-h-12 items-start gap-3 rounded-2xl border border-line bg-card/80 px-4 py-3">{inner}</div>
-              )}
-            </li>
-          );
-        })}
-      </ul>
     </section>
   );
 }
