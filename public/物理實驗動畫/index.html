@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>物理實驗動畫</title>
+<meta name="description" content="六支互動式物理實驗動畫：密立根油滴、拉塞福散射、湯姆射線管、單擺、牛頓三大運動定律、歐姆定律。">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0f1e;--p:#12192e;--t:#e6ecff;--m:#8a97b8;--c:#4de3ff;--o:#ffb454;--g:#6dff9b;--k:#ff5fa2}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--t);
+ font-family:"Space Grotesk","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+ padding:32px 18px 56px;max-width:1000px;margin:0 auto}
+h1{font-size:26px;margin:0 0 6px}
+.sub{color:var(--m);font-size:14px;line-height:1.7;margin-bottom:24px}
+.back{display:inline-block;color:var(--c);text-decoration:none;font-size:13px;margin-bottom:18px;border:1px solid #2f3d6b;border-radius:8px;padding:6px 12px}
+.back:hover{border-color:var(--c);box-shadow:0 0 8px #4de3ff55}
+h2{font-size:14px;color:var(--m);font-weight:500;margin:28px 0 12px;letter-spacing:.04em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+a.card{display:block;background:var(--p);border:1px solid #2f3d6b;border-radius:12px;
+ padding:16px 18px;text-decoration:none;color:var(--t);transition:border-color .2s,box-shadow .2s,transform .2s}
+a.card:hover{border-color:var(--c);box-shadow:0 0 20px #4de3ff33;transform:translateY(-2px)}
+a.card .t{font-size:16px;font-weight:700;display:block;margin-bottom:6px}
+a.card .d{font-size:13px;color:var(--m);line-height:1.6;display:block}
+a.card .tag{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:11px;
+ margin-top:10px;padding:2px 8px;border-radius:20px;background:#1c2748;color:var(--c)}
+footer{color:var(--m);font-size:12.5px;margin-top:36px;line-height:1.8}
+</style>
+</head>
+<body>
+<a class="back" href="/">← 回個人站點</a>
+<h1>物理實驗動畫</h1>
+<div class="sub">六支可以在瀏覽器裡直接操作的互動動畫。拖動滑桿改變參數，觀察物理量即時變化。</div>
+
+<h2>電與原子</h2>
+<div class="grid">
+  <a class="card" href="./Millikan-Oil-Drop.html">
+    <span class="t">密立根油滴</span>
+    <span class="d">量測電子電荷。調整電場讓油滴懸浮，由平衡條件算出基本電荷 e。</span>
+    <span class="tag">電荷量子化</span>
+  </a>
+  <a class="card" href="./rutherford_scattering.html">
+    <span class="t">拉塞福散射</span>
+    <span class="d">α 粒子打向金箔。大多數直穿、少數大角度反彈，推得原子核的存在。</span>
+    <span class="tag">原子結構</span>
+  </a>
+  <a class="card" href="./thomson_crt.html">
+    <span class="t">湯姆射線管</span>
+    <span class="d">陰極射線在電場與磁場中的偏折，量出電子的荷質比 e/m。</span>
+    <span class="tag">e/m 測定</span>
+  </a>
+  <a class="card" href="./ohms_law.html">
+    <span class="t">歐姆定律 V = IR</span>
+    <span class="d">固定溫度下改變電壓，記錄 (V, I) 數據，驗證 V–I 圖是通過原點的直線。</span>
+    <span class="tag">電路 · 斜率 1/R</span>
+  </a>
+</div>
+
+<h2>力與運動</h2>
+<div class="grid">
+  <a class="card" href="./newton_laws.html">
+    <span class="t">牛頓三大運動定律</span>
+    <span class="d">慣性、F = ma、作用與反作用。三個分頁各自可調參數、即時看到速度與加速度。</span>
+    <span class="tag">慣性 · F = ma</span>
+  </a>
+  <a class="card" href="./pendulum_energy.html">
+    <span class="t">單擺與能量</span>
+    <span class="d">兩個質量不同的單擺同時釋放。週期與質量無關，動能與位能互相轉換。</span>
+    <span class="tag">能量守恆</span>
+  </a>
+</div>
+
+<footer>
+  全部動畫為單一 HTML 檔，可離線使用。<br>
+  physics long · 桃園
+</footer>
+</body>
+</html>

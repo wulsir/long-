@@ -111,33 +111,38 @@ export const physicsPieces = [
   },
   {
     label: "密立根油滴",
-    href: "/experiments/Millikan-Oil-Drop.html",
+    href: "/物理實驗動畫/Millikan-Oil-Drop.html",
     note: "油滴實驗互動模擬。",
   },
   {
     label: "拉塞福散射",
-    href: "/experiments/rutherford_scattering.html",
+    href: "/物理實驗動畫/rutherford_scattering.html",
     note: "α 粒子散射動畫。",
   },
   {
     label: "湯姆射線管",
-    href: "/experiments/thomson_crt.html",
+    href: "/物理實驗動畫/thomson_crt.html",
     note: "陰極射線管動畫。",
   },
   {
     label: "單擺與能量",
-    href: "/experiments/pendulum_energy.html",
+    href: "/物理實驗動畫/pendulum_energy.html",
     note: "週期、動能位能互換。",
   },
   {
     label: "牛頓三大定律",
-    href: "/experiments/newton_laws.html",
+    href: "/物理實驗動畫/newton_laws.html",
     note: "慣性、F = ma、作用反作用。",
   },
   {
     label: "歐姆定律 V = IR",
-    href: "/experiments/ohms_law.html",
+    href: "/物理實驗動畫/ohms_law.html",
     note: "V–I 圖與斜率 1/R。",
+  },
+  {
+    label: "全部動畫（目錄）",
+    href: "/物理實驗動畫/",
+    note: "六支動畫的總覽頁。",
   },
 ];
 
@@ -211,13 +216,13 @@ export const updates: { date: string; type: string; title: string; href?: string
     date: "10-21",
     type: "分享",
     title: "加入單擺、牛頓定律、歐姆定律三支實驗動畫",
-    href: "/experiments/pendulum_energy.html",
+    href: "/物理實驗動畫/pendulum_energy.html",
   },
   {
     date: "10-19",
     type: "更新",
     title: "加入物理實驗動畫：密立根油滴、拉塞福散射、湯姆森射線管",
-    href: "/experiments/Millikan-Oil-Drop.html",
+    href: "/物理實驗動畫/Millikan-Oil-Drop.html",
   },
   { date: "10-10", type: "更新", title: "加上軌道時鐘、今日物理箋與工作室節奏" },
   {

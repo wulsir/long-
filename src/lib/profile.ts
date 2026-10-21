@@ -104,12 +104,12 @@ export const featuredLinks: FeaturedLink[] = [
     icon: "brain",
     subLinks: [
       { label: "物理AI教學影片", href: "https://youtu.be/TmxfccWpFWo?si=-bvrT1cRg63NRD0K" },
-      { label: "密立根油滴", href: "/experiments/Millikan-Oil-Drop.html" },
-      { label: "拉塞福散射", href: "/experiments/rutherford_scattering.html" },
-      { label: "湯姆射線管", href: "/experiments/thomson_crt.html" },
-      { label: "單擺與能量", href: "/experiments/pendulum_energy.html" },
-      { label: "牛頓三大定律", href: "/experiments/newton_laws.html" },
-      { label: "歐姆定律 V = IR", href: "/experiments/ohms_law.html" },
+      { label: "密立根油滴", href: "/物理實驗動畫/Millikan-Oil-Drop.html" },
+      { label: "拉塞福散射", href: "/物理實驗動畫/rutherford_scattering.html" },
+      { label: "湯姆射線管", href: "/物理實驗動畫/thomson_crt.html" },
+      { label: "單擺與能量", href: "/物理實驗動畫/pendulum_energy.html" },
+      { label: "牛頓三大定律", href: "/物理實驗動畫/newton_laws.html" },
+      { label: "歐姆定律 V = IR", href: "/物理實驗動畫/ohms_law.html" },
     ],
   },
 ];
