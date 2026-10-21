@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>歐姆定律 V = IR 實驗動畫</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0f1e;--p:#12192e;--t:#e6ecff;--m:#8a97b8;--c:#4de3ff;--o:#ffb454;--g:#6dff9b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--t);font-family:"Space Grotesk","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;padding:14px}
+h1{font-size:20px;margin:0 0 4px}.sub{color:var(--m);font-size:13px;margin-bottom:10px}
+canvas{width:100%;max-width:1000px;display:block;background:var(--p);border-radius:12px;box-shadow:0 0 24px #4de3ff22}
+.card{background:var(--p);border-radius:10px;padding:10px 14px;max-width:1000px;margin-top:10px}
+.card label{font-size:13px;color:var(--m)}.card b{color:var(--t);font-family:"IBM Plex Mono",monospace}
+input[type=range]{width:100%}
+button{background:#1c2748;color:var(--t);border:1px solid #2f3d6b;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:14px;margin:8px 6px 0 0}
+button:hover{border-color:var(--c)}button.on{border-color:var(--c);color:var(--c);box-shadow:0 0 10px #4de3ff66}
+.note{color:var(--m);font-size:12.5px;margin-top:8px;line-height:1.6}
+</style></head><body>
+<h1>同溫下,導體端電壓與電流成正比:V = IR</h1>
+<div class="sub">溫度固定(25°C)的定值電阻:調整電源電壓,記錄 (V, I) 數據,觀察 V–I 圖是否為通過原點的直線。</div>
+<canvas id="c" width="1000" height="560"></canvas>
+<div class="card">
+ <label>電源電壓 V:<b id="vV">6.0</b> V<input id="V" type="range" min="0" max="12" step="0.5" value="6"></label>
+ <div style="margin-top:6px"><span style="color:var(--m);font-size:13px">電阻 R(同一溫度):</span>
+  <button data-r="5">5 Ω</button><button data-r="10" class="on">10 Ω</button><button data-r="20">20 Ω</button></div>
+ <div><button id="rec">記錄數據</button><button id="sw">自動掃描 0→12 V</button><button id="clr">清除數據</button></div>
+ <div class="note">電子(藍點)沿導線朝電源正極漂移,電流 I 的方向(橘色箭頭)與電子相反。電流愈大,電子漂移愈快,電阻中的離子晶格振動(發熱)也愈劇烈。不同電阻的數據點會落在不同斜率的直線上,斜率 = 1/R。</div>
+</div>
+<script>
+const cv=document.getElementById('c'),x=cv.getContext('2d'),W=1000,H=560,$=id=>document.getElementById(id);
+const COL={5:'#4de3ff',10:'#ffb454',20:'#6dff9b'};
+let V=6,R=10,data=[],sweeping=false,last=performance.now();
+const pts=[[80,130],[500,130],[500,430],[80,430]];let seg=[],Ptot=0;
+for(let i=0;i<4;i++){const a=pts[i],b=pts[(i+1)%4],l=Math.hypot(b[0]-a[0],b[1]-a[1]);seg.push({a,b,l,s0:Ptot});Ptot+=l}
+function at(s){s=((s%Ptot)+Ptot)%Ptot;for(const g of seg)if(s<=g.s0+g.l){const f=(s-g.s0)/g.l;return[g.a[0]+(g.b[0]-g.a[0])*f,g.a[1]+(g.b[1]-g.a[1])*f]}return pts[0]}
+const els=Array.from({length:64},(_,i)=>i*Ptot/64);
+$('V').oninput=e=>{V=+e.target.value;$('vV').textContent=V.toFixed(1)};
+document.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{R=+b.dataset.r;document.querySelectorAll('[data-r]').forEach(o=>o.className=o===b?'on':'')});
+$('rec').onclick=()=>{data=data.filter(d=>!(d.R===R&&d.V===V));data.push({V,R,I:V/R})};
+$('clr').onclick=()=>data=[];
+$('sw').onclick=()=>{if(sweeping)return;sweeping=true;let v=0;const id=setInterval(()=>{V=v;$('V').value=v;$('vV').textContent=v.toFixed(1);data=data.filter(d=>!(d.R===R&&d.V===V));data.push({V,R,I:V/R});v+=1;if(v>12){clearInterval(id);sweeping=false}},450)};
+function txt(s,X,Y,c,sz,al){x.fillStyle=c;x.font=(sz||14)+'px "IBM Plex Mono","Noto Sans TC",monospace';x.textAlign=al||'left';x.fillText(s,X,Y)}
+function meter(cx,cy,l,c){x.fillStyle='#0d1428';x.strokeStyle=c;x.lineWidth=3;x.shadowColor=c;x.shadowBlur=12;x.beginPath();x.arc(cx,cy,24,0,7);x.fill();x.stroke();x.shadowBlur=0;txt(l,cx,cy+7,c,20,'center')}
+function draw(dt){
+ const I=V/R;x.clearRect(0,0,W,H);
+ // 導線(缺口留給電池、電阻、安培計)
+ x.strokeStyle='#5a6aa0';x.lineWidth=4;x.beginPath();
+ x.moveTo(80,230);x.lineTo(80,130);x.lineTo(220,130);x.moveTo(360,130);x.lineTo(500,130);x.lineTo(500,250);x.moveTo(500,290);x.lineTo(500,430);x.lineTo(80,430);x.lineTo(80,290);x.stroke();
+ // 電壓計並聯
+ x.lineWidth=2;x.strokeStyle='#ff8fb8';x.beginPath();x.moveTo(220,130);x.lineTo(220,70);x.lineTo(266,70);x.moveTo(360,130);x.lineTo(360,70);x.lineTo(314,70);x.stroke();
+ // 電池
+ x.strokeStyle='#e6ecff';x.lineWidth=4;x.beginPath();x.moveTo(55,230);x.lineTo(105,230);x.stroke();x.lineWidth=8;x.beginPath();x.moveTo(65,260);x.lineTo(95,260);x.stroke();x.lineWidth=4;x.beginPath();x.moveTo(80,260);x.lineTo(80,290);x.stroke();
+ txt('+',112,238,'#ff6b6b',20);txt('−',112,272,'#6bb5ff',22);txt(V.toFixed(1)+' V',30,208,'#e6ecff',15);
+ // 電阻:離子晶格
+ x.fillStyle='#1a2342';x.strokeStyle=COL[R];x.lineWidth=3;x.beginPath();x.roundRect(220,106,140,48,6);x.fill();x.stroke();
+ const amp=Math.min(5,I*2.2);const t=performance.now()/1000;
+ for(let i=0;i<7;i++)for(let j=0;j<2;j++){const X=238+i*20+Math.sin(t*30+i*3+j)*amp*.7,Y=118+j*24+Math.cos(t*27+i+j*5)*amp*.7;x.fillStyle='rgba(255,'+(180-I*50)+',120,.9)';x.beginPath();x.arc(X,Y,4,0,7);x.fill()}
+ txt('R = '+R+' Ω(25°C)',290,98,COL[R],14,'center');
+ meter(290,70,'V','#ff8fb8');txt(V.toFixed(2)+' V',290,38,'#ff8fb8',14,'center');
+ meter(500,270,'A','#ffb454');txt(I.toFixed(2)+' A',545,276,'#ffb454',15);
+ // 電子
+ const sp=I*90;els.forEach((s,i)=>{els[i]=(s-sp*dt+Ptot)%Ptot;const[p,q]=at(els[i]);
+  if(q>=106&&q<=154&&p>=220&&p<=360)return;
+  if(Math.hypot(p-500,q-270)<26||Math.hypot(p-80,q-260)<30&&Math.abs(p-80)<3&&q>230&&q<290)return;
+  x.shadowColor='#4de3ff';x.shadowBlur=8;x.fillStyle='#4de3ff';x.beginPath();x.arc(p,q,4,0,7);x.fill();x.shadowBlur=0});
+ // 電子在電阻內:穿過顯示
+ for(let k=0;k<5;k++){const f=((t*I*0.6+k/5)%1);const X=372-152*f;if(I>0){x.fillStyle='#4de3ff';x.globalAlpha=.9;x.beginPath();x.arc(X,130+Math.sin(t*20+k*7)*10*Math.min(1,I),3.5,0,7);x.fill();x.globalAlpha=1}}
+ // 電流方向
+ if(I>0){x.strokeStyle='#ffb454';x.fillStyle='#ffb454';x.lineWidth=3;x.beginPath();x.moveTo(120,160);x.lineTo(180,160);x.stroke();x.beginPath();x.moveTo(190,160);x.lineTo(176,153);x.lineTo(176,167);x.fill();txt('電流 I',120,182,'#ffb454',13)}
+ // 讀數
+ txt('V = '+V.toFixed(1)+' V',70,490,'#ff8fb8',18);txt('I = '+I.toFixed(2)+' A',250,490,'#ffb454',18);txt('V / I = '+(I>0?(V/I).toFixed(1):R.toFixed(1))+' Ω',420,490,COL[R],18);
+ txt('V = I R  ⇒  I = V / R',70,525,'#8a97b8',14);
+ // V–I 圖
+ const gx=640,gy=60,gw=320,gh=360,vm=12,im=2.5;
+ x.fillStyle='#0d1428';x.fillRect(gx,gy,gw,gh);x.strokeStyle='#2a355c';x.lineWidth=1;x.strokeRect(gx,gy,gw,gh);
+ for(let v=0;v<=12;v+=3){const X=gx+v/vm*gw;x.beginPath();x.moveTo(X,gy);x.lineTo(X,gy+gh);x.stroke();txt(v,X,gy+gh+16,'#8a97b8',11,'center')}
+ for(let i=0;i<=2.5;i+=.5){const Y=gy+gh-i/im*gh;x.beginPath();x.moveTo(gx,Y);x.lineTo(gx+gw,Y);x.stroke();txt(i.toFixed(1),gx-6,Y+4,'#8a97b8',11,'right')}
+ txt('電壓 V (V)',gx+gw/2,gy+gh+36,'#c8d2ff',12,'center');txt('電流 I (A)',gx,gy-12,'#c8d2ff',12);
+ [5,10,20].forEach(r=>{const d=data.filter(o=>o.R===r);if(d.length<2)return;
+  const k=d.reduce((s,o)=>s+o.V*o.I,0)/d.reduce((s,o)=>s+o.V*o.V,0);
+  x.strokeStyle=COL[r];x.globalAlpha=.6;x.lineWidth=2;x.setLineDash([6,4]);x.beginPath();x.moveTo(gx,gy+gh);x.lineTo(gx+gw,gy+gh-Math.min(k*vm,im)/im*gh);
+  x.stroke();x.setLineDash([]);x.globalAlpha=1;txt('斜率 '+k.toFixed(2)+' = 1/'+r+'Ω',gx+gw-6,gy+gh-k*vm*0+0>0?gy+14+[5,10,20].indexOf(r)*16:0,COL[r],12,'right')});
+ data.forEach(o=>{x.fillStyle=COL[o.R];x.shadowColor=COL[o.R];x.shadowBlur=8;x.beginPath();x.arc(gx+o.V/vm*gw,gy+gh-o.I/im*gh,5,0,7);x.fill();x.shadowBlur=0});
+ const lx=gx+V/vm*gw,ly=gy+gh-I/im*gh;x.strokeStyle='#fff';x.lineWidth=2;x.beginPath();x.arc(lx,ly,8,0,7);x.stroke();
+ txt('即時 ○',gx+gw,gy+gh+54,'#fff',12,'right');
+ txt('通過原點的直線 → 成正比',gx+gw/2,gy+gh+54,'#8a97b8',12,'center')}
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;draw(dt);requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+</script></body></html>

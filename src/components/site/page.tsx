@@ -258,7 +258,7 @@ function Featured() {
       <p className="text-xs font-medium tracking-wide text-subtle">正在合作</p>
       <h2 className="mt-2 font-display text-2xl text-ink">物理與 AI</h2>
       <p className="mt-2 text-sm leading-relaxed text-muted">
-        教學影片已經上線，油滴、拉塞福散射、湯姆森射線管三支實驗動畫也可以直接玩。
+        教學影片已經上線，六支實驗動畫也可以直接在站內操作。
       </p>
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         {physicsPieces.map((piece, index) => (

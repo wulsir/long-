@@ -124,10 +124,25 @@ export const physicsPieces = [
     href: "/experiments/thomson_crt.html",
     note: "陰極射線管動畫。",
   },
+  {
+    label: "單擺與能量",
+    href: "/experiments/pendulum_energy.html",
+    note: "週期、動能位能互換。",
+  },
+  {
+    label: "牛頓三大定律",
+    href: "/experiments/newton_laws.html",
+    note: "慣性、F = ma、作用反作用。",
+  },
+  {
+    label: "歐姆定律 V = IR",
+    href: "/experiments/ohms_law.html",
+    note: "V–I 圖與斜率 1/R。",
+  },
 ];
 
 export const experimentNote =
-  "油滴、拉塞福散射、湯姆森射線管已上線；落體、單擺還在後製，會先在課堂裡走一遍。";
+  "六支實驗動畫已上線：密立根油滴、拉塞福散射、湯姆射線管、單擺、牛頓定律、歐姆定律。";
 
 export const slips = [
   {
@@ -192,6 +207,12 @@ export const rhythm = [
 ];
 
 export const updates: { date: string; type: string; title: string; href?: string }[] = [
+  {
+    date: "10-21",
+    type: "分享",
+    title: "加入單擺、牛頓定律、歐姆定律三支實驗動畫",
+    href: "/experiments/pendulum_energy.html",
+  },
   {
     date: "10-19",
     type: "更新",

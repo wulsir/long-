@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>牛頓三大運動定律實驗動畫</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0f1e;--p:#12192e;--t:#e6ecff;--m:#8a97b8;--c:#4de3ff;--o:#ffb454;--g:#6dff9b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--t);font-family:"Space Grotesk","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;padding:14px}
+h1{font-size:20px;margin:0 0 8px}
+canvas{width:100%;max-width:1000px;display:block;background:var(--p);border-radius:12px;box-shadow:0 0 24px #4de3ff22}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;max-width:1000px;margin-bottom:10px}
+.tabs button{flex:1;min-width:150px;padding:10px;background:#1c2748;color:var(--t);border:1px solid #2f3d6b;border-radius:8px;cursor:pointer;font-size:15px}
+.tabs button.on{border-color:var(--c);box-shadow:0 0 12px #4de3ff66;color:var(--c)}
+.card{background:var(--p);border-radius:10px;padding:10px 14px;max-width:1000px;margin-top:10px}
+.card label{display:block;font-size:13px;color:var(--m);margin-top:6px}
+.card b{color:var(--t);font-family:"IBM Plex Mono",monospace}
+input[type=range]{width:100%}
+button.a{background:#1c2748;color:var(--t);border:1px solid #2f3d6b;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:14px;margin:8px 6px 0 0}
+button.a:hover{border-color:var(--c)}
+.law{font-size:14px;line-height:1.7;color:#c8d2ff}
+</style></head><body>
+<h1>牛頓三大運動定律實驗動畫</h1>
+<div class="tabs" id="tabs"></div>
+<canvas id="c" width="1000" height="560"></canvas>
+<div class="card"><div class="law" id="law"></div><div id="ctrl"></div></div>
+<script>
+const cv=document.getElementById('c'),x=cv.getContext('2d'),W=1000,H=560,$=id=>document.getElementById(id);
+const names=['第一定律 慣性','第二定律 F = ma','第三定律 作用與反作用'];
+const laws=['<b>慣性定律:</b>物體不受外力(或合力為零)時,靜者恆靜、動者沿直線等速運動。冰面幾乎無摩擦,推一下之後,車的速度不再改變;重力 W 與支撐力 N 互相抵消,水平方向合力為 0。',
+'<b>加速度定律:</b>合力 F = m a。相同的力作用下,質量越大加速度越小;右上角 v–t 圖的斜率就是加速度 a = F/m。',
+'<b>作用與反作用定律:</b>A 對 B 施力 F,B 必同時對 A 施反向等大的力。兩車受力大小相同,但加速度 a = F/m 與質量成反比,因此質量小的車跑得快,且總動量 m₁v₁ + m₂v₂ 保持 0。'];
+let mode=0,S={},run=false,paused=false,last=performance.now();
+const tb=$('tabs');names.forEach((n,i)=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>setMode(i);tb.appendChild(b)});
+const sl=(id,l,a,b,s,v,u)=>`<label>${l}:<b id="v_${id}">${v}</b> ${u}<input id="${id}" type="range" min="${a}" max="${b}" step="${s}" value="${v}"></label>`;
+const val=id=>+$(id).value;
+function setMode(i){mode=i;[...tb.children].forEach((b,j)=>b.className=j==i?'on':'');$('law').innerHTML=laws[i];
+ const c=$('ctrl');
+ if(i==0)c.innerHTML=sl('m','質量 m',1,10,1,2,'kg')+sl('F','推力 F',2,20,1,10,'N')+'<button class="a" id="b1">向右推 1 秒</button><button class="a" id="b2">向左推 1 秒</button><button class="a" id="b3">歸零重設</button>';
+ if(i==1)c.innerHTML=sl('m','質量 m',1,10,1,2,'kg')+sl('F','持續推力 F',2,20,1,10,'N')+'<button class="a" id="b1">開始</button><button class="a" id="b3">重設</button>';
+ if(i==2)c.innerHTML=sl('m1','甲車質量 m₁',1,6,1,1,'kg')+sl('m2','乙車質量 m₂',1,6,1,4,'kg')+sl('F','彈簧推力 F',5,20,1,10,'N')+'<button class="a" id="b1">釋放彈簧</button><button class="a" id="b3">重設</button>';
+c.insertAdjacentHTML('beforeend','<button class="a" id="bp">'+(paused?'▶ 繼續':'⏸ 暫停')+'</button>');
+ $('bp').onclick=()=>{paused=!paused;$('bp').textContent=paused?'▶ 繼續':'⏸ 暫停'};
+ c.querySelectorAll('input').forEach(e=>e.oninput=()=>{$('v_'+e.id).textContent=e.value;if(mode==2&&!S.go)init();if(mode==1&&!S.go)init()});
+ $('b3').onclick=init;
+ if(i==0){$('b1').onclick=()=>{S.pt=1;S.dir=1};$('b2').onclick=()=>{S.pt=1;S.dir=-1}}
+ if(i==1)$('b1').onclick=()=>{S.go=true};
+ if(i==2)$('b1').onclick=()=>{if(!S.go){S.go=true;S.t=0}};
+ init()}
+function init(){
+ if(mode==0)S={X:0,v:0,pt:0,dir:1};
+ if(mode==1)S={X:0,v:0,t:0,go:false,h:[]};
+ if(mode==2)S={t:0,go:false,xa:0,xb:0,va:0,vb:0}}
+function arrow(x1,y1,x2,y2,c,w){x.strokeStyle=c;x.fillStyle=c;x.lineWidth=w||3;x.beginPath();x.moveTo(x1,y1);x.lineTo(x2,y2);x.stroke();
+ const a=Math.atan2(y2-y1,x2-x1);if(Math.hypot(x2-x1,y2-y1)<2)return;x.beginPath();x.moveTo(x2,y2);x.lineTo(x2-10*Math.cos(a-.4),y2-10*Math.sin(a-.4));x.lineTo(x2-10*Math.cos(a+.4),y2-10*Math.sin(a+.4));x.fill()}
+function txt(s,X,Y,c,sz,al){x.fillStyle=c;x.font=(sz||14)+'px "IBM Plex Mono","Noto Sans TC",monospace';x.textAlign=al||'left';x.fillText(s,X,Y)}
+function cart(cx,cy,w,col,lab){x.shadowColor=col;x.shadowBlur=18;x.fillStyle=col;x.beginPath();x.roundRect(cx-w/2,cy-44,w,44,6);x.fill();x.shadowBlur=0;
+ x.fillStyle='#0a0f1e';[-w/2+14,w/2-14].forEach(o=>{x.beginPath();x.arc(cx+o,cy+4,8,0,7);x.fill()});txt(lab,cx,cy-18,'#0a0f1e',14,'center')}
+function ground(off,y,sc){x.fillStyle='#1a2342';x.fillRect(0,y+12,W,H-y-12);x.strokeStyle='#3a4670';x.lineWidth=2;x.beginPath();x.moveTo(0,y+12);x.lineTo(W,y+12);x.stroke();
+ if(off!==null){x.strokeStyle='#5a6aa0';for(let m=-30;m<60;m++){let X=((m*sc-off*sc)%1e9);X=500+(m-off)*sc;if(X<0||X>W)continue;x.beginPath();x.moveTo(X,y+12);x.lineTo(X,y+(m%5==0?32:24));x.stroke();if(m%5==0)txt(m+' m',X,y+50,'#8a97b8',11,'center')}}}
+function update(dt){if(paused)return;
+ if(mode==0){const m=val('m'),F=val('F');let a=0;if(S.pt>0){a=S.dir*F/m;S.pt-=dt}S.a=a;S.v+=a*dt;S.X+=S.v*dt}
+ if(mode==1&&!S.go)S.a=0;
+ if(mode==1&&S.go){const a=val('F')/val('m');S.a=a;S.v+=a*dt;S.X+=S.v*dt;S.t+=dt;S.h.push([S.t,S.v]);if(S.t>10)S.go=false}
+ if(mode==2&&S.go){const m1=val('m1'),m2=val('m2'),F=val('F');S.t+=dt;const f=S.t<.4?F:0;
+  S.va+=-f/m1*dt;S.vb+=f/m2*dt;S.xa+=S.va*dt;S.xb+=S.vb*dt;
+  if(Math.abs(S.xa)>22||Math.abs(S.xb)>22)S.go=false}}
+function draw(){x.clearRect(0,0,W,H);
+ if(mode<2){const m=val('m'),F=val('F'),w=70+m*5,cy=380,cx=500;
+  ground(S.X,cy,40);cart(cx,cy,w,'#4de3ff',m+' kg');
+  const pushing=mode==0?S.pt>0:S.go;
+  arrow(cx,cy-60,cx,cy-100,'#8a97b8',2);txt('N',cx+8,cy-75,'#8a97b8',12);arrow(cx+25,cy-60,cx+25,cy-20,'#8a97b8',2);txt('W',cx+33,cy-40,'#8a97b8',12);
+  {const d=mode==0?S.dir:1,sx=cx-d*w/2;
+   if(pushing){arrow(sx-d*70,cy-22,sx,cy-22,'#ffb454',5);txt('F = '+F+' N',sx-d*35,cy-34,'#ffb454',13,'center')}
+   else{x.setLineDash([5,5]);x.strokeStyle='#ffb45488';x.lineWidth=2;x.beginPath();x.moveTo(cx-w/2-70,cy-22);x.lineTo(cx-w/2,cy-22);x.stroke();x.setLineDash([]);txt('F = 0 N',cx-w/2-35,cy-34,'#ffb45499',13,'center')}}
+  txt('速度 v = '+S.v.toFixed(2)+' m/s',40,50,'#4de3ff',20);
+  {const va=Math.max(-300,Math.min(300,S.v*25)),aa=Math.max(-200,Math.min(200,(S.a||0)*12));
+   if(Math.abs(va)>=3)arrow(cx,cy-120,cx+va,cy-120,'#4de3ff',4);else{x.fillStyle='#4de3ff';x.beginPath();x.arc(cx,cy-120,4,0,7);x.fill()}
+   txt('v = '+S.v.toFixed(2),cx+va/2,cy-130,'#4de3ff',12,'center');
+   if(Math.abs(aa)>=3)arrow(cx,cy-155,cx+aa,cy-155,'#6dff9b',4);else{x.fillStyle='#6dff9b';x.beginPath();x.arc(cx,cy-155,4,0,7);x.fill()}
+   txt('a = '+(S.a||0).toFixed(2),cx+aa/2,cy-165,'#6dff9b',12,'center')}
+  if(mode==0){const net=pushing?S.dir*F:0;txt('水平合力 ΣF = '+net+' N',40,80,net?'#ffb454':'#6dff9b',18);
+   txt(net?'受力中:速度改變':(S.v?'合力為 0:速度保持不變(慣性)':'合力為 0:保持靜止'),40,108,'#8a97b8',14)}
+  if(mode==1){txt('a = F/m = '+(F/m).toFixed(2)+' m/s²',40,80,'#6dff9b',20);txt('t = '+S.t.toFixed(1)+' s',40,108,'#8a97b8',14);
+   const gx=560,gy=40,gw=400,gh=190;x.fillStyle='#0d1428';x.fillRect(gx,gy,gw,gh);x.strokeStyle='#2a355c';x.strokeRect(gx,gy,gw,gh);
+   txt('v–t 圖(斜率 = a)',gx,gy-8+2,'#c8d2ff',12);const vm=Math.max(5,20*10/1);const vmax=Math.max(2,val('F')/val('m')*10);
+   x.strokeStyle='#ffb454';x.lineWidth=2;x.beginPath();S.h.forEach((p,i)=>{const X=gx+p[0]/10*gw,Y=gy+gh-p[1]/vmax*gh;i?x.lineTo(X,Y):x.moveTo(X,Y)});x.stroke();
+   txt('10 s',gx+gw,gy+gh+14,'#8a97b8',11,'right');txt(vmax.toFixed(0)+' m/s',gx-4,gy+10,'#8a97b8',11,'right')}}
+ else{const cy=330,cx=500,sc=20,m1=val('m1'),m2=val('m2'),F=val('F'),wa=50+m1*10,wb=50+m2*10;
+  const ax=cx+S.xa*sc-20-wa/2,bx=cx+S.xb*sc+20+wb/2,pushing=S.go&&S.t<.4;
+  ground(null,cy,20);cart(ax,cy,wa,'#4de3ff','甲 '+m1+' kg');cart(bx,cy,wb,'#ffb454','乙 '+m2+' kg');
+  if(!S.go&&S.t===0||pushing){x.strokeStyle='#e6ecff';x.lineWidth=2;x.beginPath();const l=ax+wa/2,r=bx-wb/2;x.moveTo(l,cy-22);
+   for(let i=1;i<=10;i++)x.lineTo(l+(r-l)*i/10,cy-22+(i%2?-10:10));x.stroke()}
+  {const f=pushing?F:0,L=F*5;x.globalAlpha=pushing?1:.4;
+   arrow(ax-wa/2,cy-70,ax-wa/2-L,cy-70,'#ffb454',5);txt('乙對甲 F = '+f+' N',ax-wa/2-L/2,cy-82,'#ffb454',13,'center');
+   arrow(bx+wb/2,cy-70,bx+wb/2+L,cy-70,'#4de3ff',5);txt('甲對乙 F = '+f+' N',bx+wb/2+L/2,cy-82,'#4de3ff',13,'center');
+   arrow(ax-wa/2,cy-110,ax-wa/2-F/m1*5,cy-110,'#6dff9b',4);txt('a₁ = '+(f/m1).toFixed(1),ax-wa/2-F/m1*2.5,cy-120,'#6dff9b',12,'center');
+   arrow(bx+wb/2,cy-110,bx+wb/2+F/m2*5,cy-110,'#6dff9b',4);txt('a₂ = '+(f/m2).toFixed(1),bx+wb/2+F/m2*2.5,cy-120,'#6dff9b',12,'center');x.globalAlpha=1}
+  [[ax,S.va,'#4de3ff','v₁'],[bx,S.vb,'#ffb454','v₂']].forEach(([X,v,c,l])=>{const L=v*12;
+   if(Math.abs(L)>=3)arrow(X,cy-155,X+L,cy-155,c,4);else{x.fillStyle=c;x.beginPath();x.arc(X,cy-155,4,0,7);x.fill()}
+   txt(l+' = '+v.toFixed(2),X+L/2,cy-165,c,12,'center')});
+  txt('甲:v₁ = '+S.va.toFixed(2)+' m/s   p₁ = '+(m1*S.va).toFixed(2),40,50,'#4de3ff',17);
+  txt('乙:v₂ = '+S.vb.toFixed(2)+' m/s   p₂ = '+(m2*S.vb).toFixed(2),40,78,'#ffb454',17);
+  txt('總動量 p₁ + p₂ = '+(m1*S.va+m2*S.vb).toFixed(2)+' kg·m/s',40,106,'#6dff9b',17);
+  txt(S.go||S.t>0?'彈簧作用 0.4 s 後脫離;兩車受力等大,但質量小者速度大':'按「釋放彈簧」:兩車受到等大反向的力',40,500,'#8a97b8',14)}}
+function loop(now){const dt=Math.min(.033,(now-last)/1000);last=now;update(dt);draw();if(paused)txt('⏸ 暫停中',W-20,30,'#ffb454',16,'right');requestAnimationFrame(loop)}
+setMode(0);requestAnimationFrame(loop);
+</script></body></html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>單擺實驗:週期與質量無關、動能與位能互換</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0f1e;--p:#12192e;--t:#e6ecff;--m:#8a97b8;--c:#4de3ff;--o:#ffb454;--g:#6dff9b;--k:#ff5fa2}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--t);font-family:"Space Grotesk","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;padding:14px}
+h1{font-size:20px;margin:0 0 4px}.sub{color:var(--m);font-size:13px;margin-bottom:10px}
+canvas{width:100%;max-width:1000px;display:block;background:var(--p);border-radius:12px;box-shadow:0 0 24px #4de3ff22}
+.row{display:flex;flex-wrap:wrap;gap:10px;max-width:1000px;margin-top:10px}
+.card{background:var(--p);border-radius:10px;padding:10px 14px;flex:1;min-width:200px}
+.card label{display:block;font-size:13px;color:var(--m);margin-top:6px}
+.card b{color:var(--t);font-family:"IBM Plex Mono",monospace}
+input[type=range]{width:100%}
+button{background:#1c2748;color:var(--t);border:1px solid #2f3d6b;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:14px;margin-right:6px}
+button:hover{border-color:var(--c);box-shadow:0 0 8px #4de3ff55}
+.big{font-family:"IBM Plex Mono",monospace;font-size:22px}
+.note{color:var(--m);font-size:12.5px;margin-top:6px;line-height:1.6}
+</style></head><body>
+<h1>單擺實驗:週期與擺錘質量無關・動能與重力位能互換</h1>
+<div class="sub">忽略空氣阻力。兩個擺長、擺角相同,但質量不同的單擺同時釋放。</div>
+<canvas id="c" width="1000" height="600"></canvas>
+<div class="row">
+ <div class="card">
+  <label>擺長 L:<b id="vL"></b> m<input id="L" type="range" min="0.4" max="1.8" step="0.05" value="1.0"></label>
+  <label>釋放角 θ₀:<b id="va"></b>°<input id="a" type="range" min="5" max="60" step="1" value="30"></label>
+  <label>擺錘 1 質量:<b id="v1"></b> kg<input id="m1" type="range" min="0.5" max="10" step="0.5" value="1"></label>
+  <label>擺錘 2 質量:<b id="v2"></b> kg<input id="m2" type="range" min="0.5" max="10" step="0.5" value="5"></label>
+  <label>播放速度:<b id="vs"></b>×<input id="sp" type="range" min="0.25" max="2" step="0.25" value="1"></label>
+  <div style="margin-top:10px"><button id="pb">暫停</button><button id="rb">重設</button></div>
+ </div>
+ <div class="card" style="flex-basis:100%">
+  <div style="color:var(--m);font-size:13px">即時能量大小(單位:焦耳 J)</div>
+  <div style="display:flex;flex-wrap:wrap;gap:24px;margin-top:6px">
+   <div><div style="color:var(--c)">擺 1(<span id="n1"></span> kg)</div>
+    <div class="big" style="color:var(--g)">動能 KE = <span id="k1">0</span> J</div>
+    <div class="big" style="color:var(--k)">重力位能 PE = <span id="p1">0</span> J</div>
+    <div class="big">總機械能 = <span id="e1">0</span> J</div></div>
+   <div><div style="color:var(--o)">擺 2(<span id="n2"></span> kg)</div>
+    <div class="big" style="color:var(--g)">動能 KE = <span id="k2">0</span> J</div>
+    <div class="big" style="color:var(--k)">重力位能 PE = <span id="p2">0</span> J</div>
+    <div class="big">總機械能 = <span id="e2">0</span> J</div></div>
+  </div>
+  <div class="note">重力位能以最低點為零點:PE = m g h = m g L(1 − cosθ);動能 KE = ½ m v²。</div>
+ </div>
+ <div class="card">
+  <div style="color:var(--m);font-size:13px">實測週期(同方向連續兩次通過最低點)</div>
+  <div class="big" style="color:var(--c)">T₁ = <span id="T1">—</span> s</div>
+  <div class="big" style="color:var(--o)">T₂ = <span id="T2">—</span> s</div>
+  <div class="big" style="color:var(--g)">理論 2π√(L/g) = <span id="Tt"></span> s</div>
+  <div class="note">週期只與 L、g 有關,與質量 m 無關。θ₀ 越大,實測值會比小角度公式略大。</div>
+ </div>
+</div>
+<script>
+const cv=document.getElementById('c'),x=cv.getContext('2d'),W=1000,H=600,g=9.8,S=230;
+const $=id=>document.getElementById(id);
+const P={L:1,a:30,m1:1,m2:5,sp:1};
+const pd=[{px:180,k:'m1',col:'#4de3ff'},{px:450,k:'m2',col:'#ffb454'}];
+let run=true,t=0,hist=[],last=performance.now();
+function rd(){P.L=+$('L').value;P.a=+$('a').value;P.m1=+$('m1').value;P.m2=+$('m2').value;P.sp=+$('sp').value;
+ $('vL').textContent=P.L.toFixed(2);$('va').textContent=P.a;$('v1').textContent=P.m1;$('v2').textContent=P.m2;$('vs').textContent=P.sp;
+ $('Tt').textContent=(2*Math.PI*Math.sqrt(P.L/g)).toFixed(3)}
+function reset(){rd();const a=P.a*Math.PI/180;pd.forEach(p=>{p.th=a;p.w=0;p.cr=[];p.T=null});t=0;hist=[];$('T1').textContent=$('T2').textContent='—'}
+['L','a','m1','m2'].forEach(i=>$(i).oninput=reset);$('sp').oninput=rd;
+$('rb').onclick=reset;$('pb').onclick=()=>{run=!run;$('pb').textContent=run?'暫停':'繼續'};
+const acc=th=>-(g/P.L)*Math.sin(th);
+function step(p,dt){const f=(a,w)=>[w,acc(a)];
+ const k1=f(p.th,p.w),k2=f(p.th+dt/2*k1[0],p.w+dt/2*k1[1]),k3=f(p.th+dt/2*k2[0],p.w+dt/2*k2[1]),k4=f(p.th+dt*k3[0],p.w+dt*k3[1]);
+ const pv=p.th;p.th+=dt/6*(k1[0]+2*k2[0]+2*k3[0]+k4[0]);p.w+=dt/6*(k1[1]+2*k2[1]+2*k3[1]+k4[1]);
+ if(pv<0&&p.th>=0){const tc=t+dt-dt*p.th/(p.th-pv);p.cr.push(tc);if(p.cr.length>1){p.T=p.cr[p.cr.length-1]-p.cr[p.cr.length-2]}}}
+function E(p,m){const ke=.5*m*(P.L*p.w)**2,pe=m*g*P.L*(1-Math.cos(p.th));return[ke,pe]}
+function txt(s,X,Y,c,sz,al){x.fillStyle=c;x.font=(sz||13)+'px "IBM Plex Mono","Noto Sans TC",monospace';x.textAlign=al||'left';x.fillText(s,X,Y)}
+function draw(){
+ x.clearRect(0,0,W,H);
+ pd.forEach(p=>{const m=P[p.k],r=12+4*Math.sqrt(m),Lp=P.L*S,X=p.px+Math.sin(p.th)*Lp,Y=70+Math.cos(p.th)*Lp;
+  x.strokeStyle='#3a4670';x.lineWidth=5;x.beginPath();x.moveTo(p.px-70,70);x.lineTo(p.px+70,70);x.stroke();
+  x.setLineDash([4,5]);x.lineWidth=1;x.strokeStyle='#4a5788';x.beginPath();x.moveTo(p.px,70);x.lineTo(p.px,70+Lp+30);x.stroke();
+  x.beginPath();x.arc(p.px,70,Lp,Math.PI/2-P.a*Math.PI/180,Math.PI/2+P.a*Math.PI/180);x.stroke();x.setLineDash([]);
+  const a0=P.a*Math.PI/180;x.globalAlpha=.25;x.fillStyle=p.col;x.beginPath();x.arc(p.px+Math.sin(a0)*Lp,70+Math.cos(a0)*Lp,r,0,7);x.fill();x.globalAlpha=1;
+  x.strokeStyle='#c8d2ff';x.lineWidth=2;x.beginPath();x.moveTo(p.px,70);x.lineTo(X,Y);x.stroke();
+  x.shadowColor=p.col;x.shadowBlur=22;const gr=x.createRadialGradient(X-r/3,Y-r/3,2,X,Y,r);gr.addColorStop(0,'#fff');gr.addColorStop(.3,p.col);gr.addColorStop(1,'#1a2a55');
+  x.fillStyle=gr;x.beginPath();x.arc(X,Y,r,0,7);x.fill();x.shadowBlur=0;
+  txt(m+' kg',X,Y+r+16,p.col,13,'center');
+  txt((p===pd[0]?'擺 1':'擺 2'),p.px,40,p.col,15,'center');});
+ // 能量時間圖(擺1)
+ const gx=640,gy=60,gw=330,gh=190,m=P.m1,Et=m*g*P.L*(1-Math.cos(P.a*Math.PI/180))||1e-6;
+ x.fillStyle='#0d1428';x.fillRect(gx,gy,gw,gh);x.strokeStyle='#2a355c';x.strokeRect(gx,gy,gw,gh);
+ txt('擺 1 能量隨時間 (J)',gx,gy-10,'#c8d2ff',13);
+ const win=6,t0=Math.max(0,t-win);
+ [['pe','#ff5fa2'],['ke','#6dff9b'],['tot','#ffffff']].forEach(([k,c])=>{x.strokeStyle=c;x.lineWidth=2;x.beginPath();let f=1;
+  hist.forEach(h=>{if(h.t<t0)return;const X=gx+(h.t-t0)/win*gw,Y=gy+gh-(h[k]/(Et*1.1))*gh;f?(x.moveTo(X,Y),f=0):x.lineTo(X,Y)});x.stroke()});
+ txt('位能',gx+8,gy+gh+16,'#ff5fa2');txt('動能',gx+70,gy+gh+16,'#6dff9b');txt('總和(守恆)',gx+132,gy+gh+16,'#fff');
+ txt('E = '+Et.toFixed(2)+' J',gx+gw,gy-10,'#8a97b8',12,'right');
+ // 堆疊條
+ pd.forEach((p,i)=>{const mm=P[p.k],[ke,pe]=E(p,mm),tot=ke+pe||1e-9,by=330+i*95;
+  txt('擺 '+(i+1)+'  ('+mm+' kg)  總能 '+tot.toFixed(2)+' J',gx,by-8,p.col,13);
+  x.fillStyle='#0d1428';x.fillRect(gx,by,gw,26);
+  x.fillStyle='#ff5fa2';x.fillRect(gx,by,gw*pe/tot,26);x.fillStyle='#6dff9b';x.fillRect(gx+gw*pe/tot,by,gw*ke/tot,26);
+  txt('PE '+pe.toFixed(2)+' J',gx+4,by+46,'#ff5fa2',16);txt('KE '+ke.toFixed(2)+' J',gx+gw,by+46,'#6dff9b',16,'right');
+  $('k'+(i+1)).textContent=ke.toFixed(2);$('p'+(i+1)).textContent=pe.toFixed(2);$('e'+(i+1)).textContent=tot.toFixed(2);$('n'+(i+1)).textContent=mm;});
+ txt('最高點:位能最大、動能 0 ▸ 最低點:動能最大、位能 0',gx,540,'#8a97b8',12);
+ txt('t = '+t.toFixed(2)+' s',20,585,'#8a97b8',13);
+ $('T1').textContent=pd[0].T?pd[0].T.toFixed(3):'—';$('T2').textContent=pd[1].T?pd[1].T.toFixed(3):'—';
+}
+function loop(now){let dt=Math.min(.05,(now-last)/1000)*P.sp;last=now;
+ if(run){const n=Math.ceil(dt*240),h=dt/n;for(let i=0;i<n;i++){pd.forEach(p=>step(p,h));t+=h}
+  const [ke,pe]=E(pd[0],P.m1);hist.push({t,ke,pe,tot:ke+pe});if(hist.length>3000)hist.shift()}
+ draw();requestAnimationFrame(loop)}
+reset();requestAnimationFrame(loop);
+</script></body></html>
