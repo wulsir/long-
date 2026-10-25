@@ -45,13 +45,89 @@ const iconButton =
 const linkCard =
   "group flex min-h-14 w-full items-center gap-3 rounded-3xl bg-card p-3 text-left shadow-card transition-[transform,box-shadow,background-color] duration-200 ease-out hover:-translate-y-0.5 hover:bg-card-hover hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus";
 
+type CategoryId = "all" | "teaching" | "notes" | "activity";
+
+const categories: {
+  id: CategoryId;
+  label: string;
+  hint: string;
+  count: number;
+}[] = [
+  { id: "all", label: "全部", hint: "所有內容", count: 7 },
+  { id: "teaching", label: "教學", hint: "正在合作與入口連結", count: 2 },
+  { id: "notes", label: "筆記", hint: "今日物理箋與文章摘錄", count: 2 },
+  { id: "activity", label: "動態", hint: "工作室節奏、貢獻與更新", count: 3 },
+];
+
+function CategoryBar({
+  active,
+  onPick,
+}: {
+  active: CategoryId;
+  onPick: (id: CategoryId) => void;
+}) {
+  return (
+    <div
+      className="sticky top-0 z-20 -mx-2 bg-paper/92 px-2 backdrop-blur-md"
+      style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))", paddingBottom: "0.5rem" }}
+    >
+      <div
+        role="tablist"
+        aria-label="內容分類"
+        className="flex gap-2 overflow-x-auto pr-24 [scrollbar-width:none] sm:pr-0 [&::-webkit-scrollbar]:hidden"
+      >
+        {categories.map((cat) => {
+          const on = cat.id === active;
+          return (
+            <button
+              key={cat.id}
+              type="button"
+              role="tab"
+              aria-selected={on}
+              title={cat.hint}
+              onClick={() => onPick(cat.id)}
+              className={cn(
+                "flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-[background-color,color,box-shadow,transform] duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+                on
+                  ? "bg-ink text-paper shadow-card"
+                  : "bg-card text-muted hover:-translate-y-px hover:bg-card-hover hover:text-ink hover:shadow-card",
+              )}
+            >
+              {cat.label}
+              <span
+                className={cn(
+                  "text-[0.7rem] tabular-nums",
+                  on ? "text-paper/55" : "text-subtle",
+                )}
+              >
+                {cat.count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+
 export function HomePage() {
   const [videoOpen, setVideoOpen] = useState(false);
   const [quizOpen, setQuizOpen] = useState(false);
   const [physicsQuizOpen, setPhysicsQuizOpen] = useState(false);
+  const [category, setCategory] = useState<CategoryId>("all");
+  const columnRef = useRef<HTMLDivElement>(null);
+
+  const shows = (id: Exclude<CategoryId, "all">) =>
+    category === "all" || category === id;
+
+  function pickCategory(id: CategoryId) {
+    setCategory(id);
+    columnRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   return (
-    <div className="relative min-h-dvh overflow-x-hidden">
+    <div className="relative min-h-dvh overflow-x-clip">
       <MapleField />
       <div
         className="fixed right-4 z-40 flex items-center gap-2 sm:right-6"
@@ -66,15 +142,20 @@ export function HomePage() {
       >
         <div className="grid items-start gap-10 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-16">
           <Identity onPlay={() => setVideoOpen(true)} />
-          <div className="flex min-w-0 flex-col gap-8">
-            <SlipCard />
-            <Featured />
-            <LinkList onQuiz={() => setQuizOpen(true)} onPhysicsQuiz={() => setPhysicsQuizOpen(true)} />
-            <Rhythm />
-            <Heatmap />
-            <ArticlesCard />
-            <RecentUpdates />
-            <Footer />
+          <div ref={columnRef} className="flex min-w-0 scroll-mt-2 flex-col gap-6">
+            <CategoryBar active={category} onPick={pickCategory} />
+            <div key={category} className="rise-in flex min-w-0 flex-col gap-8">
+              {shows("notes") ? <SlipCard /> : null}
+              {shows("teaching") ? <Featured /> : null}
+              {shows("teaching") ? (
+                <LinkList onQuiz={() => setQuizOpen(true)} onPhysicsQuiz={() => setPhysicsQuizOpen(true)} />
+              ) : null}
+              {shows("activity") ? <Rhythm /> : null}
+              {shows("activity") ? <Heatmap /> : null}
+              {shows("notes") ? <ArticlesCard /> : null}
+              {shows("activity") ? <RecentUpdates /> : null}
+              <Footer />
+            </div>
           </div>
         </div>
       </main>
