@@ -124,6 +124,23 @@
   animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* 只淡入，刻意不使用 transform。
+   transform（即使只是 translateY(0)）會讓元素成為 position: fixed 子元素的定位基準，
+   分類內容裡有 LinkSheet 這種 fixed 對話框，套 rise-in 會讓它被定位到容器而非視窗，
+   在手機上會整個跑到畫面外。 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fade-in 0.3s ease-out both;
+}
+
 .maple-layer {
   pointer-events: none;
   position: fixed;
@@ -186,6 +203,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .rise-in,
+  .fade-in,
   .orbit-inner,
   .orbit-outer,
   .orbit-ball,

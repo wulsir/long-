@@ -144,7 +144,7 @@ export function HomePage() {
           <Identity onPlay={() => setVideoOpen(true)} />
           <div ref={columnRef} className="flex min-w-0 scroll-mt-2 flex-col gap-6">
             <CategoryBar active={category} onPick={pickCategory} />
-            <div key={category} className="rise-in flex min-w-0 flex-col gap-8">
+            <div key={category} className="fade-in flex min-w-0 flex-col gap-8">
               {shows("notes") ? <SlipCard /> : null}
               {shows("teaching") ? <Featured /> : null}
               {shows("teaching") ? (
