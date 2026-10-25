@@ -69,12 +69,12 @@ function CategoryBar({
   return (
     <div
       className="sticky top-0 z-20 -mx-2 bg-paper/92 px-2 backdrop-blur-md"
-      style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))", paddingBottom: "0.5rem" }}
+      style={{ paddingTop: "max(0.5rem, env(safe-area-inset-top))", paddingBottom: "0.5rem" }}
     >
       <div
         role="tablist"
         aria-label="內容分類"
-        className="flex gap-2 overflow-x-auto pr-24 [scrollbar-width:none] sm:pr-0 [&::-webkit-scrollbar]:hidden"
+        className="flex gap-1.5 overflow-x-auto py-1.5 pr-24 [scrollbar-width:none] sm:gap-2 sm:pr-0 [&::-webkit-scrollbar]:hidden"
       >
         {categories.map((cat) => {
           const on = cat.id === active;
@@ -87,7 +87,7 @@ function CategoryBar({
               title={cat.hint}
               onClick={() => onPick(cat.id)}
               className={cn(
-                "flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-[background-color,color,box-shadow,transform] duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+                "relative flex shrink-0 items-center gap-1 rounded-full px-2.5 py-2 text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] transition-[background-color,color,box-shadow,transform] duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus sm:gap-2 sm:px-4 sm:py-2 sm:text-sm",
                 on
                   ? "bg-ink text-paper shadow-card"
                   : "bg-card text-muted hover:-translate-y-px hover:bg-card-hover hover:text-ink hover:shadow-card",
@@ -96,7 +96,7 @@ function CategoryBar({
               {cat.label}
               <span
                 className={cn(
-                  "text-[0.7rem] tabular-nums",
+                  "text-[0.62rem] tabular-nums sm:text-[0.7rem]",
                   on ? "text-paper/55" : "text-subtle",
                 )}
               >
