@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+
 const leaves = [
   { left: "4%", delay: "-4s", duration: "18s", size: 15, tone: 0, drift: 22, spin: 120 },
   { left: "18%", delay: "-11s", duration: "21s", size: 18, tone: 1, drift: -18, spin: -160 },
@@ -10,28 +12,61 @@ const leaves = [
 ];
 
 export function MapleField() {
+  const [enabled, setEnabled] = useState(true);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("physics-maple");
+      if (stored === "off") setEnabled(false);
+    } catch {}
+  }, []);
+
+  const toggleMaple = () => {
+    const next = !enabled;
+    setEnabled(next);
+    try {
+      localStorage.setItem("physics-maple", next ? "on" : "off");
+    } catch {}
+  };
+
   return (
-    <div className="maple-layer" aria-hidden="true">
-      {leaves.map((leaf) => (
-        <span
-          key={`${leaf.left}-${leaf.delay}`}
-          className={`maple-leaf maple-${leaf.tone}`}
-          style={{
-            left: leaf.left,
-            width: leaf.size,
-            height: leaf.size,
-            animationDelay: leaf.delay,
-            animationDuration: leaf.duration,
-            ["--maple-drift" as string]: `${leaf.drift}px`,
-            ["--maple-spin" as string]: `${leaf.spin}deg`,
-          }}
-        >
-          <svg viewBox="0 0 64 64" fill="currentColor">
-            <path d="M32 4c-1.4 8.5-7.2 11.8-13.6 9.6-1.2 6.2-6.8 8.6-12 11.8 6.4 2.2 10.2 6.4 10.8 12.2-6.4 2.6-8.4 9.8-5.2 16.2 7.2-2.6 11.4.4 14.2 6.4C28.2 56.4 30 60 32 62c2-2 3.8-5.6 5.8-9.8 2.8-6 7-9 14.2-6.4 3.2-6.4 1.2-13.6-5.2-16.2.6-5.8 4.4-10 10.8-12.2-5.2-3.2-10.8-5.6-12-11.8C39.2 15.8 33.4 12.5 32 4z" />
-            <path d="M32 28v34" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-          </svg>
-        </span>
-      ))}
-    </div>
+    <>
+      <button
+        type="button"
+        onClick={toggleMaple}
+        aria-pressed={enabled}
+        aria-label="切換楓葉特效"
+        className="fixed left-4 z-40 flex size-11 items-center justify-center rounded-full bg-card text-ink shadow-card transition-[transform,box-shadow,background-color] duration-200 ease-out hover:-translate-y-px hover:bg-card-hover hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+        style={{ top: "max(1rem, env(safe-area-inset-top))" }}
+        title={enabled ? "關閉楓葉特效" : "開啟楓葉特效"}
+      >
+        <span className="text-base" aria-hidden="true">🍁</span>
+      </button>
+
+      {enabled && (
+        <div className="maple-layer" aria-hidden="true">
+          {leaves.map((leaf) => (
+            <span
+              key={`${leaf.left}-${leaf.delay}`}
+              className={`maple-leaf maple-${leaf.tone}`}
+              style={{
+                left: leaf.left,
+                width: leaf.size,
+                height: leaf.size,
+                animationDelay: leaf.delay,
+                animationDuration: leaf.duration,
+                ["--maple-drift" as string]: `${leaf.drift}px`,
+                ["--maple-spin" as string]: `${leaf.spin}deg`,
+              }}
+            >
+              <svg viewBox="0 0 64 64" fill="currentColor">
+                <path d="M32 4c-1.4 8.5-7.2 11.8-13.6 9.6-1.2 6.2-6.8 8.6-12 11.8 6.4 2.2 10.2 6.4 10.8 12.2-6.4 2.6-8.4 9.8-5.2 16.2 7.2-2.6 11.4.4 14.2 6.4C28.2 56.4 30 60 32 62c2-2 3.8-5.6 5.8-9.8 2.8-6 7-9 14.2-6.4 3.2-6.4 1.2-13.6-5.2-16.2.6-5.8 4.4-10 10.8-12.2-5.2-3.2-10.8-5.6-12-11.8C39.2 15.8 33.4 12.5 32 4z" />
+                <path d="M32 28v34" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+              </svg>
+            </span>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
