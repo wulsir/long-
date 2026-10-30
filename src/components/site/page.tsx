@@ -38,7 +38,7 @@ import { ArticlesCard } from "@/components/site/articles";
 import { RecentUpdates } from "@/components/recent-updates";
 
 const iconButton =
-  "flex size-11 items-center justify-center rounded-full bg-card text-ink shadow-card transition-[transform,box-shadow,background-color] duration-200 ease-out hover:-translate-y-px hover:bg-card-hover hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus";
+  "flex size-11 items-center justify-center rounded-full bg-card text-ink shadow-card transition-[transform,box-shadow,background-color] duration-200 ease-out hover:-translate-y-px hover:bg-card-hover hover:text-ink hover:shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus";
 
 const linkCard =
   "group flex min-h-14 w-full items-center gap-3 rounded-3xl bg-card p-3 text-left shadow-card transition-[transform,box-shadow,background-color] duration-200 ease-out hover:-translate-y-0.5 hover:bg-card-hover hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus";
@@ -85,7 +85,7 @@ function CategoryBar({
               title={cat.hint}
               onClick={() => onPick(cat.id)}
               className={cn(
-                "relative flex shrink-0 items-center gap-1 rounded-full px-2.5 py-2 text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] transition-[background-color,color,box-shadow,transform] duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus sm:gap-2 sm:px-4 sm:py-2 sm:text-sm",
+                "relative flex shrink-0 items-center gap-1 rounded-full px-2.5 py-2 text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] transition-[background-color,transform,box-shadow] duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
                 on
                   ? "bg-ink text-paper shadow-card"
                   : "bg-card text-muted hover:-translate-y-px hover:bg-card-hover hover:text-ink hover:shadow-card",
@@ -107,7 +107,6 @@ function CategoryBar({
     </div>
   );
 }
-
 
 export function HomePage() {
   const [videoOpen, setVideoOpen] = useState(false);
@@ -202,6 +201,7 @@ function Identity({ onPlay }: { onPlay: () => void }) {
       <p className="mt-3 text-sm font-medium text-ink">{profile.role}</p>
       <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted">{profile.bio}</p>
       <p className="mt-3 max-w-xs text-sm leading-relaxed text-ink">{profile.now}</p>
+      <QuickActions />
       <ul className="mt-4 flex flex-wrap justify-center gap-2 lg:justify-start">
         {nowChips.map((chip) => (
           <li key={chip} className="rounded-full bg-wash px-3 py-1 text-xs text-ink">
@@ -212,6 +212,45 @@ function Identity({ onPlay }: { onPlay: () => void }) {
       <OrbitClock />
       <SocialRow />
     </header>
+  );
+}
+
+function QuickActions() {
+  const [copied, setCopied] = useState(false);
+
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  return (
+    <div className="mt-4 flex flex-wrap justify-center gap-2 lg:justify-start">
+      <button
+        type="button"
+        onClick={copyLink}
+        className="inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-2 text-xs font-medium text-ink shadow-card transition-[transform,background-color] duration-200 ease-out hover:-translate-y-px hover:bg-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+      >
+        {copied ? <Check className="size-3.5" strokeWidth={2} /> : <Link2 className="size-3.5" strokeWidth={1.75} />}
+        {copied ? "已複製" : "複製連結"}
+      </button>
+      <button
+        type="button"
+        onClick={scrollToTop}
+        className="inline-flex items-center gap-1.5 rounded-full bg-wash px-3 py-2 text-xs font-medium text-ink shadow-card transition-[transform,background-color] duration-200 ease-out hover:-translate-y-px hover:bg-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+      >
+        <ArrowUpRight className="size-3.5" strokeWidth={1.75} />
+        回到頂端
+      </button>
+    </div>
   );
 }
 
