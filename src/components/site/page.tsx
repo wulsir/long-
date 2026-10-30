@@ -13,8 +13,6 @@ import {
   Play,
   Sparkles,
   Sun,
-  Volume2,
-  VolumeX,
   Youtube,
 } from "lucide-react";
 import {
@@ -31,7 +29,7 @@ import {
   type LinkItem,
 } from "@/data/site";
 import { cn } from "@/lib/cn";
-import { MapleField } from "@/components/site/maple";
+import { FxAddon } from "@/components/fx-addon";
 import { LinkSheet } from "@/components/site/sheet";
 import { QuizDialog } from "@/components/site/quiz";
 import { PhysicsQuizDialog } from "@/components/site/physics-quiz";
@@ -128,12 +126,11 @@ export function HomePage() {
 
   return (
     <div className="relative min-h-dvh overflow-x-clip">
-      <MapleField />
+      <FxAddon />
       <div
         className="fixed right-4 z-40 flex items-center gap-2 sm:right-6"
         style={{ top: "max(1rem, env(safe-area-inset-top))" }}
       >
-        <MusicButton ducked={videoOpen} />
         <ThemeButton />
       </div>
       <main
@@ -562,74 +559,6 @@ function VideoDialog({ open, onClose }: { open: boolean; onClose: () => void }) 
         <video ref={videoRef} src={profile.video} className="aspect-square w-full bg-ink object-cover" playsInline controls />
       </div>
     </div>
-  );
-}
-
-function MusicButton({ ducked }: { ducked: boolean }) {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [enabled, setEnabled] = useState(true);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    try {
-      setEnabled(localStorage.getItem("physics-music") !== "off");
-    } catch {
-      setEnabled(true);
-    }
-    setReady(true);
-  }, []);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.volume = ducked ? 0.12 : 0.42;
-  }, [ducked, ready]);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !ready) return;
-    if (!enabled) {
-      audio.pause();
-      return;
-    }
-    const tryPlay = () => {
-      void audio.play().catch(() => undefined);
-    };
-    tryPlay();
-    const onVisible = () => {
-      if (document.visibilityState === "visible") tryPlay();
-    };
-    window.addEventListener("pointerdown", tryPlay);
-    window.addEventListener("keydown", tryPlay);
-    document.addEventListener("visibilitychange", onVisible);
-    return () => {
-      window.removeEventListener("pointerdown", tryPlay);
-      window.removeEventListener("keydown", tryPlay);
-      document.removeEventListener("visibilitychange", onVisible);
-    };
-  }, [enabled, ready]);
-
-  function toggle() {
-    const next = !enabled;
-    setEnabled(next);
-    try {
-      localStorage.setItem("physics-music", next ? "on" : "off");
-    } catch {
-      /* ignore */
-    }
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (next) void audio.play().catch(() => undefined);
-    else audio.pause();
-  }
-
-  return (
-    <>
-      <audio ref={audioRef} src="/audio/chopin-tristesse.mp3" loop preload="metadata" playsInline />
-      <button type="button" onClick={toggle} aria-pressed={enabled} aria-label={enabled ? "關閉音樂" : "播放蕭邦〈離別〉"} className={iconButton}>
-        {enabled ? <Volume2 className="size-4" strokeWidth={1.75} /> : <VolumeX className="size-4" strokeWidth={1.75} />}
-      </button>
-    </>
   );
 }
 
