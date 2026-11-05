@@ -41,10 +41,11 @@ function gust(){for(let i=0;i<26;i++)layer.append(leaf({once:true,dur:rnd(4.2,8)
 
 /* ---------- 3D 女主角（取代小貓；模型與引擎在 /heroine/，需要時才載入） ---------- */
 const HERO_BASE='/heroine/';
+const HERO_VER='?v=20261105b';
 let heroP=null;
 const loadScript=src=>new Promise((ok,ng)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>ng(new Error('load '+src));document.head.append(s)});
 function loadHero(){
-  if(!heroP)heroP=loadScript(HERO_BASE+'engine.js').then(()=>{window.__heroineSize=S.heroSize||0;return loadScript(HERO_BASE+'heroine.js')}).then(()=>window.__heroine.ready).catch(e=>{heroP=null;throw e});
+  if(!heroP)heroP=loadScript(HERO_BASE+'engine.js'+HERO_VER).then(()=>{window.__heroineSize=S.heroSize||0;return loadScript(HERO_BASE+'heroine.js'+HERO_VER)}).then(()=>window.__heroine.ready).catch(e=>{heroP=null;throw e});
   return heroP;
 }
 const showBubble=(t,ms)=>{if(window.__heroine)window.__heroine.say(t,ms)};
