@@ -49,34 +49,47 @@
     WALK_YAW: 1.25,              // 走路時身體轉向的角度（弧度）
     SCALE: 0.0106                // 模型單位（公分）轉公尺
   };
-  const k = CFG.CHAR_PX / 230;
-  const W = Math.round(90 * k), H = CFG.CHAR_PX;
-  const CW = Math.round(320 * k), CH = H + Math.round(60 * k), PAD = Math.round(12 * k);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const SIZE_MIN = 100, SIZE_MAX = 380;
+  let k, W, H, CW, CH, PAD;
+  /* 依「站立高度（像素）」算出各部位尺寸；傳 0 / 空值 = 預設大小 */
+  function dims(px) {
+    H = px ? clamp(Math.round(px), SIZE_MIN, SIZE_MAX) : CFG.CHAR_PX;
+    k = H / 230;
+    W = Math.round(90 * k);
+    CW = Math.round(320 * k); CH = H + Math.round(60 * k); PAD = Math.round(12 * k);
+  }
+  dims(+window.__heroineSize || 0);
   const PHRASES = [
     '歡迎來到 physics long', 'F = ma', '你推牆，牆也推你，一樣大喔', '單擺的能量，動能和位能在互換',
     '今天看過實驗動畫了嗎？', '要不要聽一點音樂？', '牛頓說：慣性就是懶得改變', '把我拎起來看看吧'
   ];
-  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
   /* ---------- DOM ---------- */
   const pet = document.createElement('div');
   pet.id = 'fxHero';
   pet.setAttribute('aria-hidden', 'true');
-  pet.style.width = W + 'px';
-  pet.style.height = H + 'px';
   pet.innerHTML = '<div class="bub" id="fxHeroBub" role="status"></div><div class="stage"></div><div class="sh"></div>';
   document.body.appendChild(pet);
   const stage = pet.querySelector('.stage'), bub = pet.querySelector('.bub'), shadow = pet.querySelector('.sh');
-  shadow.style.width = Math.round(78 * k) + 'px';
-  shadow.style.marginLeft = -Math.round(39 * k) + 'px';
+  function layoutBox() {
+    pet.style.width = W + 'px';
+    pet.style.height = H + 'px';
+    shadow.style.width = Math.round(78 * k) + 'px';
+    shadow.style.marginLeft = -Math.round(39 * k) + 'px';
+  }
+  layoutBox();
+  /* 載入完成前先只記錄大小；載入後由 init() 換成會即時調整畫布的版本 */
+  api.setSize = px => { dims(px); layoutBox(); x = clamp(x, 0, Math.max(0, innerWidth - W)); y = floor(); };
 
   /* ---------- 狀態 ---------- */
   let enabled = false, loaded = false, raf = 0;
-  let x = Math.max(0, innerWidth / 2 - W / 2), y = innerHeight - H, vy = 0;
+  let x = 0, y = 0, vy = 0;
   let dir = 1, state = 'idle', timer = 0, faceBack = false;
   let yaw = 0, blend = 1, swing = 0, grabDX = 0, grabDY = 0, lastPX = 0;
   let downX = 0, downY = 0, downT = 0, bubUntil = 0, last = 0;
   const floor = () => innerHeight - H;
+  x = Math.max(0, innerWidth / 2 - W / 2); y = floor();
 
   function setState(s) {
     state = s;
@@ -158,19 +171,21 @@
     });
     const hp = new E.Vector3(); hips.getWorldPosition(hp);
     model.position.set(-hp.x, -minY, -hp.z);
-    const ppm = CFG.CHAR_PX / (maxY - minY);
+    const span = maxY - minY;
+    let ppm = H / span;
 
     /* 渲染器（透明背景、正交鏡頭 → 像素大小精準） */
     const renderer = new E.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(CW, CH); renderer.setClearColor(0x000000, 0);
     const cv = renderer.domElement;
-    cv.style.cssText = `left:${-(CW - W) / 2}px;bottom:${-PAD}px;width:${CW}px;height:${CH}px`;
+    const placeCanvas = () => { cv.style.cssText = `left:${-(CW - W) / 2}px;bottom:${-PAD}px;width:${CW}px;height:${CH}px`; };
+    placeCanvas();
     stage.appendChild(cv);
     const cam = new E.OrthographicCamera(-CW / 2 / ppm, CW / 2 / ppm, (CH - PAD) / ppm, -PAD / ppm, 0.1, 50);
     cam.position.z = 10;
 
-    const WALK_PX_PER_S = CFG.STRIDE_MPS * CFG.WALK_TIMESCALE * ppm;   // 地面速度 = 步幅速度 × 動畫速度
+    let WALK_PX_PER_S = CFG.STRIDE_MPS * CFG.WALK_TIMESCALE * ppm;   // 地面速度 = 步幅速度 × 動畫速度
     const tmpQ = new E.Quaternion(), axisX = new E.Vector3(1, 0, 0);
 
     function frame(now) {
@@ -211,6 +226,19 @@
       renderer.render(scene, cam);
     }
 
+    /* 即時調整大小：畫布、鏡頭、走路速度（腳才不會滑）、位置一起更新 */
+    api.setSize = px => {
+      const grounded = state !== 'drag' && state !== 'fall';
+      dims(px); layoutBox();
+      ppm = H / span;
+      WALK_PX_PER_S = CFG.STRIDE_MPS * CFG.WALK_TIMESCALE * ppm;
+      renderer.setSize(CW, CH); placeCanvas();
+      cam.left = -CW / 2 / ppm; cam.right = CW / 2 / ppm; cam.top = (CH - PAD) / ppm; cam.bottom = -PAD / ppm;
+      cam.updateProjectionMatrix();
+      x = clamp(x, 0, Math.max(0, innerWidth - W));
+      y = grounded ? floor() : Math.min(y, floor());
+      if (bub.classList.contains('on')) placeBubble();
+    };
     api.start = () => { cancelAnimationFrame(raf); last = performance.now(); raf = requestAnimationFrame(frame); };
     api.stop = () => cancelAnimationFrame(raf);
     loaded = true;
