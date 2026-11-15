@@ -87,7 +87,7 @@
   let x = 0, y = 0, vy = 0;
   let dir = 1, state = 'idle', timer = 0, faceBack = false;
   let yaw = 0, blend = 1, swing = 0, grabDX = 0, grabDY = 0, lastPX = 0;
-  let downX = 0, downY = 0, downT = 0, bubUntil = 0, last = 0;
+  let downX = 0, downY = 0, downT = 0, bubUntil = 0, last = 0, dragged = false;
   const floor = () => innerHeight - H;
   x = Math.max(0, innerWidth / 2 - W / 2); y = floor();
 
@@ -116,9 +116,38 @@
     bub.textContent = text;
     bub.classList.add('on');
     placeBubble();
-    bubUntil = performance.now() + ms;
-    clearTimeout(say.t);
-    say.t = setTimeout(() => bub.classList.remove('on'), ms);
+    /* 語音：Web Speech API，語言優先zh-TW；語音結束或逾時自動收起泡泡 */
+    try {
+      if ('speechSynthesis' in window && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const u = new window.SpeechSynthesisUtterance(text);
+        u.lang = 'zh-TW';
+        u.volume = 1;
+        u.rate = 0.92;
+        u.pitch = 1.04;
+        const voices = window.speechSynthesis.getVoices();
+        const pick = voices.find(
+          (v) => v.lang.startsWith('zh-TW') || v.lang.startsWith('zh-HK') || v.lang === 'zh-TW'
+        );
+        if (pick) u.voice = pick;
+        const dur = Math.max(620, Math.min(12000, (text.length || 1) * 78));
+        const done = () => { bub.classList.remove('on'); };
+        if (u.onend) u.onend = done;
+        window.speechSynthesis.speak(u);
+        bubUntil = performance.now() + dur;
+        clearTimeout(say.t);
+        say.t = setTimeout(() => bub.classList.remove('on'), dur);
+      } else {
+        bubUntil = performance.now() + ms;
+        clearTimeout(say.t);
+        say.t = setTimeout(() => bub.classList.remove('on'), ms);
+      }
+    } catch (e) {
+      // 瀏覽器不支援語音或被鎖定，靜默回退到原本的吐泡泡
+      bubUntil = performance.now() + ms;
+      clearTimeout(say.t);
+      say.t = setTimeout(() => bub.classList.remove('on'), ms);
+    }
   }
   const react = text => say(text || PHRASES[Math.random() * PHRASES.length | 0]);
 
@@ -202,7 +231,7 @@
         if ((timer -= dt) <= 0) pickAction();
       } else if (state === 'fall') {
         vy += 2400 * dt; y += vy * dt;
-        if (y >= floor()) { y = floor(); vy = 0; pickAction(); }
+        if (y >= floor()) { y = floor(); vy = 0; pickAction(); say('好痛!'); }
       } else if (state === 'drag') {
         swing *= Math.pow(0.02, dt);
         stage.style.transformOrigin = '50% 0';
@@ -259,13 +288,22 @@
     swing -= (e.clientX - lastPX) * 0.7; lastPX = e.clientX;
     x = clamp(e.clientX - grabDX, 0, innerWidth - W);
     y = clamp(e.clientY - grabDY, 0, innerHeight - H);
+    if (Math.hypot(e.clientX - downX, e.clientY - downY) >= 6) dragged = true;
   });
   const release = e => {
     if (state !== 'drag') return;
-    stage.style.transformOrigin = ''; vy = 0;
-    if (y < floor() - 1) setState('fall'); else pickAction();
-    // 幾乎沒移動的短按 = 點一下，讓她說句話
-    if (e && e.type === 'pointerup' && Math.hypot(e.clientX - downX, e.clientY - downY) < 6 && performance.now() - downT < 450) react();
+    stage.style.transformOrigin = '';
+    vy = 0;
+    const moved = Math.hypot(e.clientX - downX, e.clientY - downY);
+    const quick = performance.now() - downT < 450;
+    if (moved < 6 && quick) {
+      // 幾乎沒移動的短按 = 點一下，讓她說句話
+      react();
+      return;
+    }
+    if (moved >= 6 || !quick) say('不要鬧了!'); // 被拎起來了
+    if (y < floor() - 1) setState('fall');
+    else pickAction();
   };
   pet.addEventListener('pointerup', release);
   pet.addEventListener('pointercancel', release);
