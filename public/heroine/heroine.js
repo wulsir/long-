@@ -87,7 +87,7 @@
   let x = 0, y = 0, vy = 0;
   let dir = 1, state = 'idle', timer = 0, faceBack = false;
   let yaw = 0, blend = 1, swing = 0, grabDX = 0, grabDY = 0, lastPX = 0;
-  let downX = 0, downY = 0, downT = 0, bubUntil = 0, last = 0, dragged = false;
+  let downX = 0, downY = 0, downT = 0, bubUntil = 0, last = 0, dragged = false, saidPickup = false;
   const floor = () => innerHeight - H;
   x = Math.max(0, innerWidth / 2 - W / 2); y = floor();
 
@@ -111,29 +111,38 @@
     bub.style.left = (left - x) + 'px';
     bub.style.setProperty('--tail', (x + W / 2 - left) + 'px');
   }
+  /* ---------- 語音：偏好年輕溫柔女聲（繁體中文） ---------- */
+  let _voices = null;
+  function pickVoice() {
+    if (!('speechSynthesis' in window) || !window.speechSynthesis) return null;
+    if (!_voices || !_voices.length) {
+      try { _voices = window.speechSynthesis.getVoices(); } catch (e) { _voices = null; }
+    }
+    if (!_voices || !_voices.length) return null;
+    const zh = _voices.filter((v) => /^zh([-_]|$)/i.test(v.lang || '') || /chinese|中文|國語|台語/i.test(v.name || ''));
+    const female = zh.find((v) => /fem|woman|girl|lady|xiaoxiao|yunxi|yating|hanhan|lili|mei-|女/i.test(v.name || ''));
+    return female || zh.find((v) => /zh[-_]?tw/i.test(v.lang || '')) || zh[0] || null;
+  }
+  if ('speechSynthesis' in window && window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = () => { _voices = window.speechSynthesis.getVoices(); };
+  }
+
   function say(text, ms = 2800) {
     if (!enabled || !loaded) return;
     bub.textContent = text;
     bub.classList.add('on');
     placeBubble();
-    /* 語音：Web Speech API，語言優先zh-TW；語音結束或逾時自動收起泡泡 */
     try {
       if ('speechSynthesis' in window && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
         const u = new window.SpeechSynthesisUtterance(text);
-        u.lang = 'zh-TW';
+        const v = pickVoice();
+        if (v) { u.voice = v; u.lang = v.lang || 'zh-TW'; } else { u.lang = 'zh-TW'; }
         u.volume = 1;
-        u.rate = 0.92;
-        u.pitch = 1.04;
-        const voices = window.speechSynthesis.getVoices();
-        const pick = voices.find(
-          (v) => v.lang.startsWith('zh-TW') || v.lang.startsWith('zh-HK') || v.lang === 'zh-TW'
-        );
-        if (pick) u.voice = pick;
-        const dur = Math.max(620, Math.min(12000, (text.length || 1) * 78));
-        const done = () => { bub.classList.remove('on'); };
-        if (u.onend) u.onend = done;
+        u.rate = 0.95;   // 稍慢、溫柔
+        u.pitch = 1.35;  // 偏高、年輕女聲
+        /* 不呼叫 cancel()：讓句子照順序排，上一句才不會被切掉（Chrome 對 cancel+speak 也會漏播） */
         window.speechSynthesis.speak(u);
+        const dur = Math.max(760, Math.min(12000, (text.length || 1) * 120));
         bubUntil = performance.now() + dur;
         clearTimeout(say.t);
         say.t = setTimeout(() => bub.classList.remove('on'), dur);
@@ -231,7 +240,7 @@
         if ((timer -= dt) <= 0) pickAction();
       } else if (state === 'fall') {
         vy += 2400 * dt; y += vy * dt;
-        if (y >= floor()) { y = floor(); vy = 0; pickAction(); say('好痛!'); }
+        if (y >= floor()) { y = floor(); vy = 0; pickAction(); say('給我記住,好痛!'); }
       } else if (state === 'drag') {
         swing *= Math.pow(0.02, dt);
         stage.style.transformOrigin = '50% 0';
@@ -280,6 +289,7 @@
     pet.setPointerCapture(e.pointerId);
     grabDX = e.clientX - x; grabDY = e.clientY - y; lastPX = e.clientX;
     downX = e.clientX; downY = e.clientY; downT = performance.now();
+    saidPickup = false;
     bub.classList.remove('on');
     setState('drag'); e.preventDefault();
   });
@@ -289,6 +299,8 @@
     x = clamp(e.clientX - grabDX, 0, innerWidth - W);
     y = clamp(e.clientY - grabDY, 0, innerHeight - H);
     if (Math.hypot(e.clientX - downX, e.clientY - downY) >= 6) dragged = true;
+    // 一離開地面（被拎到半空中）就說「不要鬧了!」
+    if (y < floor() - 1 && !saidPickup) { saidPickup = true; say('不要鬧了!'); }
   });
   const release = e => {
     if (state !== 'drag') return;
@@ -301,7 +313,8 @@
       react();
       return;
     }
-    if (moved >= 6 || !quick) say('不要鬧了!'); // 被拎起來了
+    // 在地板上拖動（沒拎起來）→ 放開時說「不要鬧了!」
+    if (!saidPickup && (moved >= 6 || !quick)) { saidPickup = true; say('不要鬧了!'); }
     if (y < floor() - 1) setState('fall');
     else pickAction();
   };
