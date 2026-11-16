@@ -139,7 +139,7 @@
         if (v) { u.voice = v; u.lang = v.lang || 'zh-TW'; } else { u.lang = 'zh-TW'; }
         u.volume = 1;
         u.rate = 0.95;   // 稍慢、溫柔
-        u.pitch = 1.35;  // 偏高、年輕女聲
+        u.pitch = 1.6;   // 高亢、年輕女聲
         /* 不呼叫 cancel()：讓句子照順序排，上一句才不會被切掉（Chrome 對 cancel+speak 也會漏播） */
         window.speechSynthesis.speak(u);
         const dur = Math.max(760, Math.min(12000, (text.length || 1) * 120));
