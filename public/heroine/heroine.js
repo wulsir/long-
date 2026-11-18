@@ -111,38 +111,63 @@
     bub.style.left = (left - x) + 'px';
     bub.style.setProperty('--tail', (x + W / 2 - left) + 'px');
   }
-  /* ---------- 語音：偏好年輕溫柔女聲（繁體中文） ---------- */
+  /* ---------- 語音：真實年輕女聲音檔（自然甜美少女音）與自然合成備援 ---------- */
+  const VOICE_MAP = {
+    '歡迎來到 physics long': BASE + 'audio/welcome.mp3',
+    '歡迎來到 physics long～': BASE + 'audio/welcome_wave.mp3',
+    '我回來囉～': BASE + 'audio/back.mp3',
+    'F = ma': BASE + 'audio/f_ma.mp3',
+    '你推牆，牆也推你，一樣大喔': BASE + 'audio/wall.mp3',
+    '單擺的能量，動能和位能在互換': BASE + 'audio/pendulum.mp3',
+    '今天看過實驗動畫了嗎？': BASE + 'audio/experiment.mp3',
+    '要不要聽一點音樂？': BASE + 'audio/music.mp3',
+    '牛頓說：慣性就是懶得改變': BASE + 'audio/newton.mp3',
+    '把我拎起來看看吧': BASE + 'audio/pickup.mp3',
+    '不要鬧了!': BASE + 'audio/stop.mp3',
+    '給我記住,好痛!': BASE + 'audio/pain.mp3',
+    '給我記住，好痛!': BASE + 'audio/pain.mp3'
+  };
+
+  let currentAudio = null;
   let _voices = null;
+
   function pickVoice() {
     if (!('speechSynthesis' in window) || !window.speechSynthesis) return null;
     if (!_voices || !_voices.length) {
       try { _voices = window.speechSynthesis.getVoices(); } catch (e) { _voices = null; }
     }
     if (!_voices || !_voices.length) return null;
-    const zh = _voices.filter((v) => /^zh([-_]|$)/i.test(v.lang || '') || /chinese|中文|國語|台語/i.test(v.name || ''));
-    const female = zh.find((v) => /fem|woman|girl|lady|xiaoxiao|yunxi|yating|hanhan|lili|mei-|女/i.test(v.name || ''));
-    return female || zh.find((v) => /zh[-_]?tw/i.test(v.lang || '')) || zh[0] || null;
+    const zh = _voices.filter((v) => /^zh([-_]|$)/i.test(v.lang || '') || /chinese|中文|國語/i.test(v.name || ''));
+    // 優先挑選自然神經女聲（Natural / Neural / Online / Premium / Enhanced）
+    const naturalFemale = zh.find((v) =>
+      /(natural|neural|online|enhanced|premium)/i.test(v.name) &&
+      /(hsiaochen|hsiaoyu|yating|mei-jia|szu-ching|曉臻|雅婷|美佳|曉雨)/i.test(v.name)
+    );
+    if (naturalFemale) return naturalFemale;
+
+    const zhTwFemale = zh.find((v) =>
+      /zh[-_]?tw/i.test(v.lang || '') &&
+      !/hanhan|yunxi|desktop/i.test(v.name) &&
+      /(fem|woman|girl|lady|女)/i.test(v.name)
+    );
+    return zhTwFemale || zh.find((v) => /zh[-_]?tw/i.test(v.lang || '')) || zh[0] || null;
   }
+
   if ('speechSynthesis' in window && window.speechSynthesis) {
     window.speechSynthesis.onvoiceschanged = () => { _voices = window.speechSynthesis.getVoices(); };
   }
 
-  function say(text, ms = 2800) {
-    if (!enabled || !loaded) return;
-    bub.textContent = text;
-    bub.classList.add('on');
-    placeBubble();
+  function speakSynthesisFallback(text, ms) {
     try {
       if ('speechSynthesis' in window && window.speechSynthesis) {
         const u = new window.SpeechSynthesisUtterance(text);
         const v = pickVoice();
         if (v) { u.voice = v; u.lang = v.lang || 'zh-TW'; } else { u.lang = 'zh-TW'; }
         u.volume = 1;
-        u.rate = 0.95;   // 稍慢、溫柔
-        u.pitch = 1.6;   // 高亢、年輕女聲
-        /* 不呼叫 cancel()：讓句子照順序排，上一句才不會被切掉（Chrome 對 cancel+speak 也會漏播） */
+        u.rate = 1.02;   // 輕快、自然的少女語速
+        u.pitch = 1.08;  // 微高但自然的清脆音調，消除 1.6 的變形機械感
         window.speechSynthesis.speak(u);
-        const dur = Math.max(760, Math.min(12000, (text.length || 1) * 120));
+        const dur = Math.max(1200, Math.min(12000, (text.length || 1) * 200));
         bubUntil = performance.now() + dur;
         clearTimeout(say.t);
         say.t = setTimeout(() => bub.classList.remove('on'), dur);
@@ -152,11 +177,40 @@
         say.t = setTimeout(() => bub.classList.remove('on'), ms);
       }
     } catch (e) {
-      // 瀏覽器不支援語音或被鎖定，靜默回退到原本的吐泡泡
       bubUntil = performance.now() + ms;
       clearTimeout(say.t);
       say.t = setTimeout(() => bub.classList.remove('on'), ms);
     }
+  }
+
+  function say(text, ms = 2800) {
+    if (!enabled || !loaded) return;
+    bub.textContent = text;
+    bub.classList.add('on');
+    placeBubble();
+
+    const cleanKey = (text || '').trim();
+    const audioUrl = VOICE_MAP[cleanKey] || VOICE_MAP[cleanKey.replace(/[～~！!？?]$/, '')];
+
+    if (audioUrl) {
+      if (currentAudio) {
+        try { currentAudio.pause(); currentAudio.currentTime = 0; } catch (_) {}
+      }
+      const audio = new Audio(audioUrl);
+      currentAudio = audio;
+      audio.play().then(() => {
+        const dur = Math.max(1600, ((audio.duration && !isNaN(audio.duration)) ? audio.duration : 2.4) * 1000 + 400);
+        bubUntil = performance.now() + dur;
+        clearTimeout(say.t);
+        say.t = setTimeout(() => bub.classList.remove('on'), dur);
+      }).catch(() => {
+        // 若受瀏覽器 Autoplay 政策限制或音訊加載異常，無縫回退至調校後的自然 Web Speech
+        speakSynthesisFallback(text, ms);
+      });
+      return;
+    }
+
+    speakSynthesisFallback(text, ms);
   }
   const react = text => say(text || PHRASES[Math.random() * PHRASES.length | 0]);
 
@@ -340,6 +394,13 @@
     enabled = false;
     bub.classList.remove('on');
     if (api.stop) api.stop();
+    if (currentAudio) {
+      try { currentAudio.pause(); currentAudio.currentTime = 0; } catch (_) {}
+      currentAudio = null;
+    }
+    if ('speechSynthesis' in window && window.speechSynthesis) {
+      try { window.speechSynthesis.cancel(); } catch (_) {}
+    }
     pet.classList.remove('ready', 'on');
   };
   api.say = say;
