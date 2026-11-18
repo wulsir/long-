@@ -158,23 +158,29 @@
   }
 
   function speakSynthesisFallback(text, ms) {
-    const synth = window.speechSynthesis;
-    if (!synth) return;
-    try { synth.cancel(); } catch (_) {}
-    const u = new synth.Utterance(text);
-    const v = pickVoice();
-    if (v) { u.voice = v; u.lang = v.lang || 'zh-TW'; } else { u.lang = 'zh-TW'; }
-    u.volume = 1;
-    u.rate = 1.02;
-    u.pitch = 1.08;
-    const hide = () => { if (bub.classList.contains('on')) bub.classList.remove('on'); };
-    u.onend = hide;
-    u.onerror = () => { if (bub.classList.contains('on')) bub.classList.remove('on'); };
-    try { synth.speak(u); } catch (_) {}
-    const dur = Math.max(1200, Math.min(12000, (text.length || 1) * 200));
-    bubUntil = performance.now() + dur;
-    clearTimeout(say.t);
-    say.t = setTimeout(() => { if (bub.classList.contains('on')) bub.classList.remove('on'); }, dur);
+    try {
+      if ('speechSynthesis' in window && window.speechSynthesis) {
+        const u = new window.SpeechSynthesisUtterance(text);
+        const v = pickVoice();
+        if (v) { u.voice = v; u.lang = v.lang || 'zh-TW'; } else { u.lang = 'zh-TW'; }
+        u.volume = 1;
+        u.rate = 1.02;   // 輕快、自然的少女語速
+        u.pitch = 1.08;  // 微高但自然的清脆音調，消除 1.6 的變形機械感
+        window.speechSynthesis.speak(u);
+        const dur = Math.max(1200, Math.min(12000, (text.length || 1) * 200));
+        bubUntil = performance.now() + dur;
+        clearTimeout(say.t);
+        say.t = setTimeout(() => bub.classList.remove('on'), dur);
+      } else {
+        bubUntil = performance.now() + ms;
+        clearTimeout(say.t);
+        say.t = setTimeout(() => bub.classList.remove('on'), ms);
+      }
+    } catch (e) {
+      bubUntil = performance.now() + ms;
+      clearTimeout(say.t);
+      say.t = setTimeout(() => bub.classList.remove('on'), ms);
+    }
   }
 
   function say(text, ms = 2800) {
@@ -190,52 +196,24 @@
       if (currentAudio) {
         try { currentAudio.pause(); currentAudio.currentTime = 0; } catch (_) {}
       }
-      currentAudio = new Audio(audioUrl);
-      const speakBySynth = () => {
-        const synth = window.speechSynthesis;
-        if (!synth) return;
-        try { synth.cancel(); } catch (_) {}
-        const u = new synth.Utterance(text);
-        const v = pickVoice();
-        if (v) { u.voice = v; u.lang = v.lang || 'zh-TW'; } else { u.lang = 'zh-TW'; }
-        u.volume = 1;
-        u.rate = 1.02;
-        u.pitch = 1.08;
-        const hide = () => { if (bub.classList.contains('on')) bub.classList.remove('on'); };
-        u.onend = hide;
-        u.onerror = () => { if (bub.classList.contains('on')) bub.classList.remove('on'); };
-        try { synth.speak(u); } catch (_) {}
-        const dur = Math.max(1200, Math.min(12000, (text.length || 1) * 200));
+      const audio = new Audio(audioUrl);
+      currentAudio = audio;
+      audio.play().then(() => {
+        const dur = Math.max(1600, ((audio.duration && !isNaN(audio.duration)) ? audio.duration : 2.4) * 1000 + 400);
         bubUntil = performance.now() + dur;
         clearTimeout(say.t);
-        say.t = setTimeout(() => { if (bub.classList.contains('on')) bub.classList.remove('on'); }, dur);
-      };
-      const ok = currentAudio.play();
-      if (ok && typeof ok.catch === 'function') {
-        ok.catch(() => {
-          currentAudio = null;
-          // 播放被瀏覽器 Autoplay 限制，改走語音合成；若合成也不可用，就等下次點他
-          if (!('speechSynthesis' in window && window.speechSynthesis)) {
-            scheduleSay(text, ms);
-          } else {
-            speakBySynth();
-          }
-        });
-      } else if (!('speechSynthesis' in window && window.speechSynthesis)) {
-        scheduleSay(text, ms);
-      }
+        say.t = setTimeout(() => bub.classList.remove('on'), dur);
+      }).catch(() => {
+        // 若受瀏覽器 Autoplay 政策限制或音訊加載異常，無縫回退至調校後的自然 Web Speech
+        speakSynthesisFallback(text, ms);
+      });
       return;
     }
 
     speakSynthesisFallback(text, ms);
   }
   const react = text => say(text || PHRASES[Math.random() * PHRASES.length | 0]);
-  const pending = [];
-  const scheduleSay = (text, ms) => { pending.push({ text, ms }); };
-  const drainPending = () => {
-    const list = pending.splice(0);
-    for (const item of list) say(item.text, item.ms);
-  };
+
   /* ---------- 載入模型（載入後才建立場景） ---------- */
   async function init() {
     const loadTex = (url, srgb) => new Promise((res, rej) => {
@@ -396,7 +374,6 @@
   };
   pet.addEventListener('pointerup', release);
   pet.addEventListener('pointercancel', release);
-  pet.addEventListener('click', drainPending);
   addEventListener('resize', () => {
     x = Math.min(x, Math.max(0, innerWidth - W));
     if (state !== 'drag' && state !== 'fall') y = floor();
@@ -405,7 +382,6 @@
 
   /* ---------- 對外介面 ---------- */
   api.enable = () => {
-    drainPending();
     if (!loaded) return;
     enabled = true;
     if (state !== 'drag' && state !== 'fall') y = floor();
