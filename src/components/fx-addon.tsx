@@ -9,7 +9,7 @@ export function FxAddon() {
     if (document.getElementById("fx-addon-script")) return;
     const script = document.createElement("script");
     script.id = "fx-addon-script";
-    script.src = "/fx-addon.js?v=20261118a"; // 改版時換個字串，可避開瀏覽器舊快取
+    script.src = "/fx-addon.js?v=20261119a"; // 改版時換個字串，可避開瀏覽器舊快取
     script.defer = true;
     document.body.appendChild(script);
   }, []);

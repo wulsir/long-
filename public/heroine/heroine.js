@@ -16,7 +16,7 @@
   st.id = 'fxHeroStyle';
   st.textContent = `
 #fxHero{position:fixed;left:0;top:0;z-index:30;touch-action:none;user-select:none;-webkit-user-select:none;
-  -webkit-tap-highlight-color:transparent;cursor:grab;will-change:transform;opacity:0;transition:opacity .4s;display:none}
+  -webkit-tap-highlight-color:transparent;cursor:pointer;will-change:transform;opacity:0;transition:opacity .4s;display:none}
 #fxHero.on{display:block}
 #fxHero.ready{opacity:1}
 #fxHero.dragging{cursor:grabbing}
@@ -60,10 +60,18 @@
     CW = Math.round(320 * k); CH = H + Math.round(60 * k); PAD = Math.round(12 * k);
   }
   dims(+window.__heroineSize || 0);
-  const PHRASES = [
-    '歡迎來到 physics long', 'F = ma', '你推牆，牆也推你，一樣大喔', '單擺的能量，動能和位能在互換',
-    '今天看過實驗動畫了嗎？', '要不要聽一點音樂？', '牛頓說：慣性就是懶得改變', '把我拎起來看看吧'
+  /* 巡場時會自動開口說的句子（每一句都有對應的女聲音檔，維持同一個聲音） */
+  const PATROL = [
+    'F = ma', '你推牆，牆也推你，一樣大喔', '單擺的能量，動能和位能在互換',
+    '今天看過實驗動畫了嗎？', '要不要聽一點音樂？', '牛頓說：慣性就是懶得改變',
+    '把我拎起來看看吧',
+    '落葉飄下來，是重力在拉著它喔', '摩擦力總是和運動方向相反',
+    '能量不會消失，只會換一種樣子陪著你', '質量越大，要讓它動起來就越費力',
+    '今天風有點涼，記得多穿一件喔', '我正在巡場，有問題就叫我'
   ];
+  /* 滑鼠碰觸她時的短句 */
+  const HOVER = ['咦？你叫我嗎？', '嗨～我在這裡喔', '怎麼啦？', '嚇我一跳！'];
+  const PHRASES = ['歡迎來到 physics long', '我回來囉～', ...PATROL, ...HOVER];
 
   /* ---------- DOM ---------- */
   const pet = document.createElement('div');
@@ -86,8 +94,26 @@
   let enabled = false, loaded = false, raf = 0;
   let x = 0, y = 0, vy = 0;
   let dir = 1, state = 'idle', timer = 0, faceBack = false;
-  let yaw = 0, blend = 1, swing = 0, grabDX = 0, grabDY = 0, lastPX = 0;
-  let downX = 0, downY = 0, downT = 0, bubUntil = 0, last = 0, dragged = false, saidPickup = false;
+  let yaw = 0, blend = 1, swing = 0, grabDX = 0, grabDY = 0, lastPX = 0, lastPY = 0;
+  let bubUntil = 0, last = 0, saidPickup = false, fallFrom = 0;
+  let nextTalk = 0, lastPhrase = '', lastHoverAt = 0, lastSayAt = -1e9;
+  let mouseX = -1e9, mouseY = -1e9, mouseSeen = false, hoverInside = false;
+  addEventListener('pointermove', e => {
+    if (e.pointerType && e.pointerType !== 'mouse') return;
+    mouseX = e.clientX; mouseY = e.clientY; mouseSeen = true;
+  }, { passive: true });
+  addEventListener('pointerout', e => {
+    if (!e.relatedTarget) { mouseSeen = false; hoverInside = false; }   // 游標離開視窗
+  }, { passive: true });
+  function hoverSay() {
+    if (!loaded || !enabled) return;
+    if (state === 'drag' || state === 'fall') return;
+    const now = performance.now();
+    if (now - lastHoverAt < 4500) return;      // 別讓經過時一直連珠炮
+    if (now < lastSayAt + 1200) return;
+    lastHoverAt = now;
+    say(HOVER[Math.random() * HOVER.length | 0]);
+  }
   const floor = () => innerHeight - H;
   x = Math.max(0, innerWidth / 2 - W / 2); y = floor();
 
@@ -125,11 +151,52 @@
     '把我拎起來看看吧': BASE + 'audio/pickup.mp3',
     '不要鬧了!': BASE + 'audio/stop.mp3',
     '給我記住,好痛!': BASE + 'audio/pain.mp3',
-    '給我記住，好痛!': BASE + 'audio/pain.mp3'
+    '給我記住，好痛!': BASE + 'audio/pain.mp3',
+    '落葉飄下來，是重力在拉著它喔': BASE + 'audio/leaf.mp3',
+    '摩擦力總是和運動方向相反': BASE + 'audio/friction.mp3',
+    '能量不會消失，只會換一種樣子陪著你': BASE + 'audio/energy.mp3',
+    '質量越大，要讓它動起來就越費力': BASE + 'audio/mass.mp3',
+    '今天風有點涼，記得多穿一件喔': BASE + 'audio/chilly.mp3',
+    '我正在巡場，有問題就叫我': BASE + 'audio/patrol.mp3',
+    '咦？你叫我嗎？': BASE + 'audio/hover_hi.mp3',
+    '嗨～我在這裡喔': BASE + 'audio/hover_hey.mp3',
+    '怎麼啦？': BASE + 'audio/hover_what.mp3',
+    '嚇我一跳！': BASE + 'audio/hover_jump.mp3'
   };
 
   let currentAudio = null;
   let _voices = null;
+  /* 行動裝置／瀏覽器會擋「還沒互動就自動播音」，所以先等第一次互動再開口，
+     這樣才會用同一個女聲音檔，而不是臨時換成另一個合成聲音。 */
+  let audioUnlocked = false;
+  let pendingSpeak = null;
+
+  function stopVoice() {
+    if (currentAudio) {
+      try { currentAudio.pause(); currentAudio.currentTime = 0; } catch (_) {}
+      currentAudio = null;
+    }
+    if ('speechSynthesis' in window && window.speechSynthesis) {
+      try { window.speechSynthesis.cancel(); } catch (_) {}
+    }
+  }
+
+  function unlockVoice() {
+    if (audioUnlocked) return;
+    audioUnlocked = true;
+    const p = pendingSpeak;
+    pendingSpeak = null;
+    const fresh = p && performance.now() - p.at < 12000;
+    // 先讓「點她回話」之類的互動優先，沒有的話再補上剛剛被擋掉的那句
+    setTimeout(() => {
+      if (!enabled || !fresh) return;
+      if (performance.now() - lastSayAt < 700) return;   // 已經有其他台詞正在說
+      say(p.text, p.ms);
+    }, 620);
+    nextTalk = Math.min(nextTalk || Infinity, performance.now() + 6500);
+  }
+  ['pointerdown', 'keydown', 'touchstart'].forEach(ev =>
+    addEventListener(ev, unlockVoice, { capture: true, passive: true }));
 
   function pickVoice() {
     if (!('speechSynthesis' in window) || !window.speechSynthesis) return null;
@@ -183,34 +250,60 @@
     }
   }
 
-  function say(text, ms = 2800) {
-    if (!enabled || !loaded) return;
+  function showBubbleText(text) {
     bub.textContent = text;
     bub.classList.add('on');
     placeBubble();
+  }
+  function trackBubble(audio) {
+    const dur = Math.max(1600, ((audio.duration && !isNaN(audio.duration)) ? audio.duration : 2.4) * 1000 + 400);
+    bubUntil = performance.now() + dur;
+    clearTimeout(say.t);
+    say.t = setTimeout(() => bub.classList.remove('on'), dur);
+  }
 
-    const cleanKey = (text || '').trim();
+  function say(text, ms = 2800) {
+    if (!enabled || !loaded || !text) return;
+    const cleanKey = String(text).trim();
     const audioUrl = VOICE_MAP[cleanKey] || VOICE_MAP[cleanKey.replace(/[～~！!？?]$/, '')];
 
-    if (audioUrl) {
-      if (currentAudio) {
-        try { currentAudio.pause(); currentAudio.currentTime = 0; } catch (_) {}
-      }
-      const audio = new Audio(audioUrl);
-      currentAudio = audio;
-      audio.play().then(() => {
-        const dur = Math.max(1600, ((audio.duration && !isNaN(audio.duration)) ? audio.duration : 2.4) * 1000 + 400);
-        bubUntil = performance.now() + dur;
-        clearTimeout(say.t);
-        say.t = setTimeout(() => bub.classList.remove('on'), dur);
-      }).catch(() => {
-        // 若受瀏覽器 Autoplay 政策限制或音訊加載異常，無縫回退至調校後的自然 Web Speech
-        speakSynthesisFallback(text, ms);
-      });
+    if (!audioUrl) {                      // 沒有對應音檔的句子才退回合成語音
+      if (!audioUnlocked) { pendingSpeak = { text, ms, at: performance.now() }; return; }
+      lastSayAt = performance.now();
+      stopVoice(); clearTimeout(say.t);
+      showBubbleText(text);
+      speakSynthesisFallback(text, ms);
       return;
     }
 
-    speakSynthesisFallback(text, ms);
+    const unlockedAlready = audioUnlocked;
+    lastSayAt = performance.now();
+    stopVoice(); clearTimeout(say.t);
+    if (unlockedAlready) showBubbleText(text);
+
+    const audio = new Audio(audioUrl);
+    currentAudio = audio;
+    audio.play().then(() => {
+      audioUnlocked = true;
+      if (!unlockedAlready) showBubbleText(text);
+      trackBubble(audio);
+    }).catch(() => {
+      if (!audioUnlocked) {
+        // 瀏覽器還不允許自動播音：先排隊，等第一次互動再用同一個女聲音檔補播
+        bub.classList.remove('on');
+        pendingSpeak = { text, ms, at: performance.now() };
+        return;
+      }
+      // 已互動過仍失敗（音檔異常）才無縫回退到調校後的自然 Web Speech
+      speakSynthesisFallback(text, ms);
+    });
+  }
+  function patrolSay() {
+    if (!PATROL.length) return;
+    let p = PATROL[Math.random() * PATROL.length | 0];
+    if (PATROL.length > 1 && p === lastPhrase) p = PATROL[(PATROL.indexOf(p) + 1) % PATROL.length];
+    lastPhrase = p;
+    say(p);
   }
   const react = text => say(text || PHRASES[Math.random() * PHRASES.length | 0]);
 
@@ -294,11 +387,29 @@
         if ((timer -= dt) <= 0) pickAction();
       } else if (state === 'fall') {
         vy += 2400 * dt; y += vy * dt;
-        if (y >= floor()) { y = floor(); vy = 0; pickAction(); say('給我記住,好痛!'); }
+        if (y >= floor()) {
+          y = floor(); vy = 0;
+          const drop = floor() - fallFrom;
+          pickAction();
+          if (drop > 36) say('給我記住,好痛!');   // 從高處摔下來才喊痛
+        }
       } else if (state === 'drag') {
         swing *= Math.pow(0.02, dt);
         stage.style.transformOrigin = '50% 0';
         stage.style.transform = `rotate(${clamp(swing, -18, 18)}deg)`;
+      }
+
+      /* 她走到滑鼠指標底下時也算「碰到」，一樣會開口 */
+      const overHero = mouseSeen && (state === 'walk' || state === 'idle') &&
+        mouseX >= x && mouseX <= x + W && mouseY >= y - 6 && mouseY <= y + H;
+      if (overHero && !hoverInside) hoverSay();
+      hoverInside = overHero;
+
+      /* 巡場時自己找話說：走動或站著時，每隔 9～16 秒開口一次 */
+      if (enabled && !document.hidden && (state === 'walk' || state === 'idle') &&
+          now > nextTalk && now > bubUntil + 900 && now > lastSayAt + 1500) {
+        patrolSay();
+        nextTalk = now + 9000 + Math.random() * 7000;
       }
 
       const target = state === 'walk' ? dir * CFG.WALK_YAW : (state === 'idle' && faceBack ? Math.PI : 0);
@@ -337,40 +448,52 @@
     setState('idle'); timer = 1.2;
   }
 
-  /* ---------- 滑鼠 / 觸控拖曳 ---------- */
+  /* ---------- 滑鼠碰觸 = 說話；長按左鍵 = 拎住；放開左鍵 = 自由掉落 ---------- */
+  const HOLD_MS = 240;   // 按住超過這個時間才算「拎住她」
+  let holdTimer = 0;
+
+  /* 滑鼠一碰到她就自動說一句（觸控沒有 hover，改成點一下回話） */
+  pet.addEventListener('pointerenter', e => {
+    if (e.pointerType === 'touch') return;
+    hoverSay();
+  });
+
   pet.addEventListener('pointerdown', e => {
-    if (!loaded) return;
+    if (!loaded || !enabled) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;   // 只認滑鼠左鍵
     pet.setPointerCapture(e.pointerId);
-    grabDX = e.clientX - x; grabDY = e.clientY - y; lastPX = e.clientX;
-    downX = e.clientX; downY = e.clientY; downT = performance.now();
+    lastPX = e.clientX; lastPY = e.clientY;
+    grabDX = e.clientX - x; grabDY = e.clientY - y;
     saidPickup = false;
-    bub.classList.remove('on');
-    setState('drag'); e.preventDefault();
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(() => {
+      if (!enabled || state === 'drag') return;
+      grabDX = lastPX - x; grabDY = lastPY - y;   // 以長按當下的指標位置為抓點
+      setState('drag');
+    }, HOLD_MS);
+    e.preventDefault();
   });
   pet.addEventListener('pointermove', e => {
-    if (state !== 'drag') return;
-    swing -= (e.clientX - lastPX) * 0.7; lastPX = e.clientX;
+    if (state !== 'drag') { lastPX = e.clientX; lastPY = e.clientY; return; }
+    swing -= (e.clientX - lastPX) * 0.7;
+    lastPX = e.clientX; lastPY = e.clientY;
     x = clamp(e.clientX - grabDX, 0, innerWidth - W);
     y = clamp(e.clientY - grabDY, 0, innerHeight - H);
-    if (Math.hypot(e.clientX - downX, e.clientY - downY) >= 6) dragged = true;
     // 一離開地面（被拎到半空中）就說「不要鬧了!」
     if (y < floor() - 1 && !saidPickup) { saidPickup = true; say('不要鬧了!'); }
   });
-  const release = e => {
-    if (state !== 'drag') return;
-    stage.style.transformOrigin = '';
-    vy = 0;
-    const moved = Math.hypot(e.clientX - downX, e.clientY - downY);
-    const quick = performance.now() - downT < 450;
-    if (moved < 6 && quick) {
-      // 幾乎沒移動的短按 = 點一下，讓她說句話
-      react();
+  const release = () => {
+    clearTimeout(holdTimer);
+    if (state === 'drag') {
+      // 放開左鍵 = 解除拎住，交還重力自由掉落
+      stage.style.transformOrigin = '';
+      vy = 0; fallFrom = y;
+      if (y < floor() - 1) setState('fall');
+      else pickAction();
       return;
     }
-    // 在地板上拖動（沒拎起來）→ 放開時說「不要鬧了!」
-    if (!saidPickup && (moved >= 6 || !quick)) { saidPickup = true; say('不要鬧了!'); }
-    if (y < floor() - 1) setState('fall');
-    else pickAction();
+    // 短按（還沒進入拎住）＝ 點一下，讓她回一句
+    if (state !== 'fall') react();
   };
   pet.addEventListener('pointerup', release);
   pet.addEventListener('pointercancel', release);
@@ -385,6 +508,9 @@
     if (!loaded) return;
     enabled = true;
     if (state !== 'drag' && state !== 'fall') y = floor();
+    fallFrom = y;
+    nextTalk = performance.now() + 5000;   // 開場招呼之後，隔幾秒再自己開口
+    clearTimeout(holdTimer);
     pet.classList.add('on');
     void pet.offsetWidth;                 // 讓 opacity 轉場生效
     pet.classList.add('ready');
@@ -392,16 +518,13 @@
   };
   api.disable = () => {
     enabled = false;
+    clearTimeout(holdTimer);
+    pendingSpeak = null;
     bub.classList.remove('on');
     if (api.stop) api.stop();
-    if (currentAudio) {
-      try { currentAudio.pause(); currentAudio.currentTime = 0; } catch (_) {}
-      currentAudio = null;
-    }
-    if ('speechSynthesis' in window && window.speechSynthesis) {
-      try { window.speechSynthesis.cancel(); } catch (_) {}
-    }
+    stopVoice();
     pet.classList.remove('ready', 'on');
+    if (state === 'drag') { setState('idle'); y = floor(); fallFrom = y; }
   };
   api.say = say;
   api.react = react;

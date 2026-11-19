@@ -150,6 +150,9 @@ export default defineConfig(({ command, isPreview }) => ({
     host: "0.0.0.0",
     port: 8080,
     strictPort: true,
+    // The live preview is proxied through a *.e2b.app host; Vite 8 blocks
+    // unknown Host headers by default, which would keep the preview blank.
+    allowedHosts: [".e2b.app", "localhost", "127.0.0.1"],
   },
   preview: {
     host: "127.0.0.1",
