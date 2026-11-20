@@ -41,7 +41,7 @@ function gust(){for(let i=0;i<26;i++)layer.append(leaf({once:true,dur:rnd(4.2,8)
 
 /* ---------- 3D 女主角（取代小貓；模型與引擎在 /heroine/，需要時才載入） ---------- */
 const HERO_BASE='/heroine/';
-const HERO_VER='?v=20261119b';
+const HERO_VER='?v=20261119c';
 let heroP=null;
 const loadScript=src=>new Promise((ok,ng)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>ng(new Error('load '+src));document.head.append(s)});
 function loadHero(){
