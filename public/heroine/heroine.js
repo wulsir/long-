@@ -6,6 +6,7 @@
   if (window.__heroine) return;
   const E = window.PetEngine;
   const BASE = '/heroine/';
+  const AUDIO_VER = '?v=20261119b';   // 換錄音時更新，避免瀏覽器用到舊音檔
 
   const api = { ready: null, enable() {}, disable() {}, say() {}, react() {} };
   window.__heroine = api;
@@ -63,7 +64,7 @@
   /* 巡場時會自動開口說的句子（每一句都有對應的女聲音檔，維持同一個聲音） */
   const PATROL = [
     'F = ma', '你推牆，牆也推你，一樣大喔', '單擺的能量，動能和位能在互換',
-    '今天看過實驗動畫了嗎？', '要不要聽一點音樂？', '牛頓說：慣性就是懶得改變',
+    '今天看過實驗動畫了嗎？', '牛頓說：慣性就是懶得改變',   // 「要不要聽一點音樂？」待重錄後再放回
     '把我拎起來看看吧',
     '落葉飄下來，是重力在拉著它喔', '摩擦力總是和運動方向相反',
     '能量不會消失，只會換一種樣子陪著你', '質量越大，要讓它動起來就越費力',
@@ -140,7 +141,7 @@
   /* ---------- 語音：真實年輕女聲音檔（自然甜美少女音）與自然合成備援 ---------- */
   const VOICE_MAP = {
     '歡迎來到 physics long': BASE + 'audio/welcome.mp3',
-    '歡迎來到 physics long～': BASE + 'audio/welcome_wave.mp3',
+    '歡迎來到 physics long～': BASE + 'audio/welcome.mp3',
     '我回來囉～': BASE + 'audio/back.mp3',
     'F = ma': BASE + 'audio/f_ma.mp3',
     '你推牆，牆也推你，一樣大喔': BASE + 'audio/wall.mp3',
@@ -281,7 +282,7 @@
     stopVoice(); clearTimeout(say.t);
     if (unlockedAlready) showBubbleText(text);
 
-    const audio = new Audio(audioUrl);
+    const audio = new Audio(audioUrl + AUDIO_VER);
     currentAudio = audio;
     audio.play().then(() => {
       audioUnlocked = true;
