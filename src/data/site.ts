@@ -116,6 +116,11 @@ export const physicsPieces = [
     note: "一堂已經上線的物理 AI 課。",
   },
   {
+    label: "物理小遊戲",
+    href: "/physics-game/",
+    note: "原理之戰：物理法則 3D，可直接在站內玩。",
+  },
+  {
     label: "密立根油滴",
     href: "/物理實驗動畫/Millikan-Oil-Drop.html",
     note: "油滴實驗互動模擬。",
