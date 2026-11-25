@@ -49,6 +49,12 @@ export const featuredLinks: FeaturedLink[] = [
     subtitle: "AI與設計選集",
     href: "https://github.com/wulsir",
     icon: "github",
+    subLinks: [
+      { label: "GitHub連結", href: "https://github.com/wulsir" },
+      { label: "AI歌曲", href: "https://suno.com/" },
+      { label: "AI動畫製作", href: "/物理實驗動畫/" },
+      { label: "AI短劇", href: "https://www.youtube.com/@Quantumlogic-rd1sv" },
+    ],
   },
   {
     title: "基礎邏輯",

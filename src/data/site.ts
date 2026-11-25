@@ -33,6 +33,12 @@ export const links: LinkItem[] = [
     subtitle: "AI 與設計選集",
     href: "https://github.com/wulsir",
     icon: "github",
+    subLinks: [
+      { label: "GitHub 連結", href: "https://github.com/wulsir" },
+      { label: "AI 歌曲", href: "https://suno.com/" },
+      { label: "AI 動畫製作", href: "/物理實驗動畫/" },
+      { label: "AI 短劇", href: "https://www.youtube.com/@Quantumlogic-rd1sv" },
+    ],
   },
   {
     title: "基礎邏輯",
