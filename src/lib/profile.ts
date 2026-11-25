@@ -52,7 +52,7 @@ export const featuredLinks: FeaturedLink[] = [
     subLinks: [
       { label: "GitHub連結", href: "https://github.com/wulsir" },
       { label: "AI歌曲", href: "/ai-songs/tianse-yi-an-ai-mv.mp4" },
-      { label: "AI動畫製作", href: "/物理實驗動畫/" },
+      { label: "AI動畫製作", href: "/ai-animation/mi-gong-dong-hua-1.mp4" },
       { label: "AI短劇", href: "/ai-short/en-qing-1ji.mp4" },
     ],
   },
