@@ -37,7 +37,7 @@ export const links: LinkItem[] = [
       { label: "GitHub 連結", href: "https://github.com/wulsir" },
       { label: "AI 歌曲", href: "/ai-songs/tianse-yi-an-ai-mv.mp4" },
       { label: "AI 動畫製作", href: "/物理實驗動畫/" },
-      { label: "AI 短劇", href: "https://www.youtube.com/@Quantumlogic-rd1sv" },
+      { label: "AI 短劇", href: "/ai-short/恩情不是愛情_第1集_完整版.mp4" },
     ],
   },
   {
