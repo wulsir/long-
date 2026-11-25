@@ -51,7 +51,7 @@ export const featuredLinks: FeaturedLink[] = [
     icon: "github",
     subLinks: [
       { label: "GitHub連結", href: "https://github.com/wulsir" },
-      { label: "AI歌曲", href: "https://suno.com/" },
+      { label: "AI歌曲", href: "/ai-songs/tianse-yi-an-ai-mv.mp4" },
       { label: "AI動畫製作", href: "/物理實驗動畫/" },
       { label: "AI短劇", href: "https://www.youtube.com/@Quantumlogic-rd1sv" },
     ],
